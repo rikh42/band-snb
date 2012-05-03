@@ -11,43 +11,19 @@
  */
 
 
+
 namespace snb\form\type;
-use snb\form\type\FieldType;
+use snb\form\type\TextType;
 
 
-class HiddenType extends FieldType
+class EmailType extends TextType
 {
-
-	public function __construct()
-	{
-		// Do the normal thing
-		parent::__construct();
-
-		// Since hidden fields are hidden (duh!), any validation errors
-		// they generate should be bubbled up to their parent
-		$this->set('bubble_errors', true);
-	}
-
-
-
 	/**
 	 * Gets the html type of the field
 	 * @return string
 	 */
 	public function getType()
 	{
-		return 'hidden';
+		return 'email';
 	}
-
-
-
-	/**
-	 * Hidden fields can not be edited in the browser
-	 * @return bool
-	 */
-	public function isEditable()
-	{
-		return false;
-	}
-
 }
