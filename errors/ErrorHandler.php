@@ -101,27 +101,34 @@ class ErrorHandler
      */
     public function handleShutdown()
     {
-        // See if there was an error
-        $error = error_get_last();
-        if ($error == NULL) {
-            return;
-        }
+        try
+        {
+            // See if there was an error
+            $error = error_get_last();
+            if ($error == NULL) {
+                return;
+            }
 
-        // ensure the error type is set
-        if (!isset($error['type'])) {
-            return;
-        }
+            // ensure the error type is set
+            if (!isset($error['type'])) {
+                return;
+            }
 
-        // we are only interested in Fatal Errors
-        if ($error['type'] != E_ERROR) {
-            return;
-        }
+            // we are only interested in Fatal Errors
+            if ($error['type'] != E_ERROR) {
+                return;
+            }
 
-        // call the exception handler to handle the error
-        $this->exceptionHandler->handle(new \ErrorException(sprintf('%s: %s in %s line %d',
-                $this->levels[E_ERROR],
-                $error['message'],
-                $error['file'],
-                $error['line'])));
+            // call the exception handler to handle the error
+            $this->exceptionHandler->handle(new \ErrorException(sprintf('%s: %s in %s line %d',
+                    $this->levels[E_ERROR],
+                    $error['message'],
+                    $error['file'],
+                    $error['line'])));
+        }
+        catch (\Exception $e)
+        {
+            // do nothing with this. just catch it to prevent it escalating.
+        }
     }
 }
