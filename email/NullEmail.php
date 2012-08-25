@@ -12,6 +12,7 @@ namespace snb\email;
 // ideal for development when you don't actually want any emails to be sent
 class NullEmail implements EmailInterface
 {
+    public function __constructor()         {}
     public function subject($subject)		{ return $this; }
     public function to($email, $name=null)	{ return $this; }
     public function cc($email, $name=null)	{ return $this; }
@@ -19,6 +20,7 @@ class NullEmail implements EmailInterface
     public function from($email, $name=null){ return $this;}
     public function htmlBody($html)			{ return $this;}
     public function textBody($plain)		{ return $this;}
+    public function attach($filename, $mime='application/octet-stream') { return $this; }
     public function tag($tag) 				{ return $this;}
     public function send() 					{}
     public function getHtmlBody()           { return ''; }

@@ -25,6 +25,7 @@ class EmailAbstract extends ContainerAware implements EmailInterface
     protected $headers;
     protected $htmlBody;
     protected $textBody;
+    protected $attachments;
 
     /**
      */
@@ -40,6 +41,7 @@ class EmailAbstract extends ContainerAware implements EmailInterface
         $this->headers = array();
         $this->htmlBody = '';
         $this->textBody = '';
+        $this->attachments = array();
     }
 
     /**
@@ -181,6 +183,37 @@ class EmailAbstract extends ContainerAware implements EmailInterface
     {
         return $this->textBody;
     }
+
+
+    /**
+     * Attach a file to the email
+     * @param string $filename - full path of the file to attach
+     * @param string $mime - mime type of the file. defaults to application/octet-stream
+     * @return EmailAbstract
+     * @throws \Exception
+     */
+    public function attach($filename, $mime='application/octet-stream')
+    {
+        // Remember the details of the file and get it ready to be attached to the message
+        $attachment = array();
+        $attachment['pathname'] = $filename;
+        $attachment['filename'] = pathinfo($filename, PATHINFO_BASENAME);
+        $attachment['mime'] = $mime;
+        $attachment['content'] = file_get_contents($filename);
+
+        // Get the content of the file
+        if ($attachment['content'] === false) {
+            // Todo: proper exception thrown here
+            throw new \Exception('Attaching file to email failed. File not found');
+        }
+
+        // Finally, add this attachement to the list
+        $this->attachments[] = $attachment;
+
+        return $this;
+    }
+
+
 
     /**
      * Tries to extract a plain text version of some content from the

@@ -17,6 +17,7 @@ interface EmailInterface
     public function from($email, $name=null);
     public function htmlBody($html);
     public function textBody($plain);
+    public function attach($filename, $mime='application/octet-stream');
     public function tag($tag);
     public function send();
 

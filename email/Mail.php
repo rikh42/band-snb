@@ -21,6 +21,7 @@ class Mail extends EmailAbstract
 
         // Create a bit of text to act as the boundary between the different parts
         $boundary = 'Multipart_Boundary_x'.md5(time()).'x';
+        $messageId = "<".uniqid('').">";
 
         // prepare the headers
         $headers = empty($this->from) ? '' : 'From: '.$this->from. "\r\n";
@@ -28,6 +29,8 @@ class Mail extends EmailAbstract
         $headers .= empty($this->cc) ? '' : 'CC: '.implode(', ', $this->cc)."\r\n";
         $headers .= empty($this->bcc) ? '' : 'BCC: '.implode(', ', $this->bcc)."\r\n";
         $headers .= "MIME-Version: 1.0\r\n";
+        $headers .= "X-Mailer: Band Framework\r\n";
+        $headers .= "Message-ID: $messageId\r\n";
         $headers .= "Content-Type: text/html; charset=utf-8\r\n";
         $headers .= "Content-Type: multipart/alternative; boundary=\"$boundary\"\r\n";
         $headers .= "Content-Transfer-Encoding: 7bit\r\n";
@@ -48,6 +51,16 @@ class Mail extends EmailAbstract
         $body.= "Content-Transfer-Encoding: 7bit\n\n";
         $body.= $this->htmlBody;
         $body.= "\n\n";
+
+        // Add any attachments...
+        foreach ($this->attachments as $attachment) {
+            $body .= "--$boundary\n";
+            $body .= 'Content-Type: '.$attachment['mime'].'; name="'.$attachment['filename'].'"'."\n";
+            $body .= "Content-Transfer-Encoding: base64\n";
+            $body .= 'Content-Disposition: attachment; filename="'.$attachment['filename'].'"'."\n\n";
+            $body .= chunk_split(base64_encode($attachment['content']), 76, "\n");
+            $body .= "\n\n";
+        }
 
         // mark the end of the message
         $body.= "--$boundary--\n";

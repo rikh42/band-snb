@@ -75,6 +75,8 @@ class PostmarkApp extends EmailAbstract
         $data['Bcc'] = implode(', ', $this->bcc);
         $data['Tag'] = $this->tag;
 
+        // Todo: output the appropriate data for attachments ($this->attachments)
+
         // Get our API token
         $token = $this->config->get('mail.postmarkapp.api_key', 'missing API Key');
         $headers = array(
