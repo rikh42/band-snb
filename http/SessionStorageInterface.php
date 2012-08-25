@@ -14,4 +14,8 @@ interface SessionStorageInterface
     public function get($key, $default=null);
     public function set($key, $value);
     public function remove($key);
+
+    public function setFlash($name, $msg);
+    public function hasFlash($name);
+    public function getFlash($name, $default=null);
 }

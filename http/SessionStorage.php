@@ -16,6 +16,10 @@ use snb\http\SessionStorageInterface;
 class SessionStorage implements SessionStorageInterface
 {
     protected $started;
+    protected $flashMessages;
+    const FLASH_KEY = '_flashes';
+
+
 
     //==============================
     // __construct
@@ -41,6 +45,15 @@ class SessionStorage implements SessionStorageInterface
         //session_name('snb');
         session_start();
         $this->started = true;
+
+        // Pull the flash messages out of the session
+        $this->flashMessages = array();
+        if (isset($_SESSION[self::FLASH_KEY])) {
+            $this->flashMessages = $_SESSION[self::FLASH_KEY];
+        }
+
+        // clear any pending flash messages
+        $_SESSION[self::FLASH_KEY] = array();
     }
 
     //==============================
@@ -76,4 +89,48 @@ class SessionStorage implements SessionStorageInterface
         }
     }
 
+
+    /**
+     * @param $name
+     * @param $msg
+     */
+    public function setFlash($name, $msg)
+    {
+        $_SESSION[self::FLASH_KEY][$name] = $msg;
+    }
+
+
+    /**
+     * Removes a flash message that had previously been set using setFlash
+     * @param $name
+     */
+    public function removeFlash($name)
+    {
+        unset($_SESSION[self::FLASH_KEY][$name]);
+    }
+
+
+    /**
+     * @param $name
+     * @return bool
+     */
+    public function hasFlash($name)
+    {
+        return array_key_exists($name, $this->flashMessages);
+    }
+
+
+    /**
+     * @param $name
+     * @param null $default
+     * @return null]
+     */
+    public function getFlash($name, $default=null)
+    {
+        if (array_key_exists($name, $this->flashMessages)) {
+            return $this->flashMessages[$name];
+        }
+
+        return $default;
+    }
 }

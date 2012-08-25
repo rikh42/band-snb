@@ -33,4 +33,16 @@ class SessionStorageNull implements SessionStorageInterface
     public function remove($key)
     {
     }
+
+    public function setFlash($name, $msg)
+    {
+    }
+
+    public function hasFlash($name)
+    {
+    }
+
+    public function getFlash($name, $default=null)
+    {
+    }
 }
