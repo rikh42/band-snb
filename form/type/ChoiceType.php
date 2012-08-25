@@ -106,7 +106,6 @@ class ChoiceType extends FieldType
                 $child->set('label', $title);
                 $child->set('value', $key);
                 $child->set('name', $key);
-                $child->set('attributes', $this->get('attributes'));
 
                 // Decide if we want checkboxes or radio buttons
                 if ($multiselect) {
@@ -117,13 +116,20 @@ class ChoiceType extends FieldType
                     $child->set('full_name', $this->getFullName());
                 }
 
+                // handle attributes
+                $attr = $this->get('attributes', array());
+                if ($this->get('readonly')) {
+                    $attr['disabled'] = 'disabled';
+                }
+
                 // See if this item is checked or not
                 if (in_array($key, $value)) {
-                    $attr = $this->get('attributes', array());
                     $attr['checked'] = 'checked';
-                    $child->set('attributes', $attr);
                     $checkedItemCount++;
                 }
+
+                // Set any attributes on the control that we have been adjusting
+                $child->set('attributes', $attr);
 
                 // add it
                 $view->addChild($child);
