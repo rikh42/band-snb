@@ -276,11 +276,19 @@ class Request
     //==============================
     public function getPort()
     {
+        // detect https requests forwarded from Pound
         if ($this->trustProxy) {
             if (strtolower($this->headers->get('X-Front-End-Https')) == 'on')
                 return 443;
         }
 
+        // Prefer the port provided in the host arg
+        $host = $this->headers->get('Host');
+        if (preg_match('/.*:(\d+)$/u', $host, $regs)) {
+            return (int) $regs[1];
+        }
+
+        // fall back to the port number in Server_Port
         return (int) $this->server->get('SERVER_PORT');
     }
 
