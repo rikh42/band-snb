@@ -469,12 +469,20 @@ class Kernel extends ContainerAware implements KernelInterface
                 $controller->setContainer($this->container);
             }
 
+            // Optionally call the init function, if it exists.
+            // This has the power to abort calling the action as well
             $response = null;
-            if ($controller->init()) {
-                // call the action on the controller - if it exists
-                if (method_exists($controller, $actionName)) {
-                    $response = call_user_func_array(array($controller, $actionName), $args);
-                }
+            $callAction = true;
+            if (method_exists($controller, 'init')) {
+                $callAction = $controller->init();
+            }
+
+            // call the action on the controller - if it exists
+            if (($callAction) && (method_exists($controller, $actionName))) {
+                $response = call_user_func_array(array($controller, $actionName), $args);
+            } else {
+                // The action did not exist. Should make this clear in the error
+                throw new PageNotFoundException("No valid action found in controller ($controllerName -> $actionName)");
             }
 
             // If we didn't get a response object, send out an event to try and get one
