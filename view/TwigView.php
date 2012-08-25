@@ -48,7 +48,13 @@ class TwigView extends ContainerAware implements ViewInterface
             'debug' => $kernel->isDebug()
         ));
 
-        // Add all the extensions that have been registed with the service provider
+        // Add the dump command (only works when debug is true)
+        $twig->addExtension(new \Twig_Extension_Debug());
+
+        // Add the app as a global...
+        $twig->addGlobal('app', $kernel);
+
+        // Add all the extensions that have been registered with the service provider
         $extensions = $this->container->getMatching('twig.extension.*');
         foreach ($extensions as $ext) {
             $twig->addExtension($ext);

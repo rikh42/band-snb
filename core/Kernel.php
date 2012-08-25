@@ -202,6 +202,23 @@ class Kernel extends ContainerAware implements KernelInterface
     }
 
 
+    /**
+     * @return \snb\http\SessionStorageInterface
+     */
+    public function getSession()
+    {
+        return $this->container->get('session');
+    }
+
+
+    /**
+     * @return \snb\http\Request
+     */
+    public function getRequest()
+    {
+        return $this->container->get('request');
+    }
+
 
     /**
      * registerServices
@@ -390,6 +407,8 @@ class Kernel extends ContainerAware implements KernelInterface
      * which is returns
      * @param  \snb\http\Request  $request
      * @return \snb\http\Response
+     * @throws \LogicException
+     * @throws \snb\exceptions\PageNotFoundException
      */
     public function handle(Request $request)
     {
