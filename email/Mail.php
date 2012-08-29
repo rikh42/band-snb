@@ -20,7 +20,7 @@ class Mail extends EmailAbstract
         $to = implode(', ', $this->to);
 
         // Create a bit of text to act as the boundary between the different parts
-        $boundary = 'Multipart_Boundary_x'.md5(time()).'x';
+        $boundary = 'Multipart_Boundary_x'.md5(time().uniqid('').'BandEmail').'x';
         $messageId = "<".uniqid('').">";
 
         // prepare the headers

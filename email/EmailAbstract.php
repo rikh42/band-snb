@@ -247,7 +247,7 @@ class EmailAbstract extends ContainerAware implements EmailInterface
         $plain = preg_replace('/[\r\n]{3,}/', "\n\n", $plain);
 
         // wrap to a safe width
-        $plain = wordwrap($plain, 70, "\n", true);
+        $plain = wordwrap($plain, 76, "\n", true);
 
         return $plain;
     }
