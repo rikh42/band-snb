@@ -344,9 +344,9 @@ class Request
     public function getPath()
     {
         // get the path directly if possible
-        if ($this->server->has('REDIRECT_URL')) {
-            return $this->server->get('REDIRECT_URL');
-        }
+        //if ($this->server->has('REDIRECT_URL')) {
+        //    return $this->server->get('REDIRECT_URL');
+        //}
 
         // Chop off the get params if there are any
         $path = $this->getUri();
