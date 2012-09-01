@@ -18,6 +18,7 @@ class EmailAbstract extends ContainerAware implements EmailInterface
 {
     protected $subject;
     protected $from;
+    protected $replyTo;
     protected $to;
     protected $cc;
     protected $bcc;

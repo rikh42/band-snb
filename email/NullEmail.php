@@ -18,6 +18,7 @@ class NullEmail implements EmailInterface
     public function cc($email, $name=null)	{ return $this; }
     public function bcc($email, $name=null)	{ return $this; }
     public function from($email, $name=null){ return $this;}
+    public function replyTo($email, $name = null) { return $this; }
     public function htmlBody($html)			{ return $this;}
     public function textBody($plain)		{ return $this;}
     public function attach($filename, $mime='application/octet-stream') { return $this; }

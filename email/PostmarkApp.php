@@ -31,15 +31,6 @@ class PostmarkApp extends EmailAbstract
         // remember these
         $this->config = $config;
         $this->logger = $logger;
-
-        // look up the from address.
-        // Postmark only lets you send emails "from" a pre configured set
-        $from = $config->get('mail.postmarkapp.from.email', null);
-        if ($from != null) {
-            $from = $this->prepareEmail($from, $config->get('mail.postmarkapp.from.name', null));
-        }
-
-        $this->from = $from;
     }
 
     /**
@@ -63,6 +54,12 @@ class PostmarkApp extends EmailAbstract
             return false;
         }
 
+        // Force the from address to be the registered one...
+        $this->from(
+            $this->config->get('mail.postmarkapp.from.email', null),
+            $this->config->get('mail.postmarkapp.from.name', null));
+
+
         // Start to prepare the date, ready for sending to postmark
         $data = array();
         $data['Subject'] = $this->subject;
@@ -75,7 +72,18 @@ class PostmarkApp extends EmailAbstract
         $data['Bcc'] = implode(', ', $this->bcc);
         $data['Tag'] = $this->tag;
 
-        // Todo: output the appropriate data for attachments ($this->attachments)
+        // output the appropriate data for attachments ($this->attachments)
+        if (count($this->attachments) > 0) {
+            $data['Attachments'] = array();
+
+            foreach ($this->attachments as $attachment) {
+                $data['Attachments'][] = array(
+                    'Name' => $attachment['filename'],
+                    'Content' => base64_encode($attachment['content']),
+                    'ContentType' => $attachment['mime']
+                );
+            }
+        }
 
         // Get our API token
         $token = $this->config->get('mail.postmarkapp.api_key', 'missing API Key');

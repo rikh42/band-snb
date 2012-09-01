@@ -15,6 +15,7 @@ interface EmailInterface
     public function cc($email, $name=null);
     public function bcc($email, $name=null);
     public function from($email, $name=null);
+    public function replyTo($email, $name = null);
     public function htmlBody($html);
     public function textBody($plain);
     public function attach($filename, $mime='application/octet-stream');
