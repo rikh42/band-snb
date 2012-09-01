@@ -416,12 +416,11 @@ class Kernel extends ContainerAware implements KernelInterface
             // Boot the kernel if it hasn't already happened
             $this->boot();
 
-            // add the session to the request, if we have one defined
-            $request->setSession($this->container->get('session'));
-
             // place the request into the service container
             $this->container->set('request', $request);
-            $config = $this->container->get('config');
+
+            // add the session to the request, if we have one defined
+            $request->setSession($this->container->get('session'));
 
             // Get the dispatcher and send an event for the route
             // This is the "is this request OK" event. If you want to
