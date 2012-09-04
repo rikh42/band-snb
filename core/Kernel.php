@@ -309,9 +309,9 @@ class Kernel extends ContainerAware implements KernelInterface
     /**
      * Turns a system pathname (eg example:/cache) into a full path
      * eg /app/project/path/example/src/cache
-     * @param  string                    $name
+     * @param $name
      * @return string
-     * @throws \InvalidArgumentException
+     * @throws \ErrorException
      */
     public function findPath($name)
     {
