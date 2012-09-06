@@ -14,7 +14,22 @@ namespace snb\core;
  */
 class ApcAutoLoader extends AutoLoader
 {
-    protected $cacheKey = 'ApcAutoLoader';
+    protected $cacheKey;
+
+
+    /**
+     * Set the cache key to something - this is prefixed
+     * to any values stored in APC to provide a way to
+     * prevent clashes from different apps running on the
+     * same server. Recommend setting the cache key to
+     * the name of your app.
+     * @param string $cacheKey
+     */
+    public function __construct($cacheKey = 'ApcAutoLoader')
+    {
+        $this->cacheKey = $cacheKey;
+    }
+
 
 
     /**

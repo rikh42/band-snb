@@ -7,12 +7,15 @@
  */
 
 namespace snb\core;
+use snb\core\AutoLoaderInterface;
+
+
 
 /**
  * AutoLoader
  * Loads in classes based on their namespace and name
  */
-class AutoLoader
+class AutoLoader implements AutoLoaderInterface
 {
     protected $namespaces = array();
     protected $prefix = array();
