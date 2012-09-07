@@ -16,6 +16,7 @@ interface AutoLoaderInterface
 {
     public function registerNamespaces($namespaces);
     public function registerPrefixes($prefixes);
+    public function registerMappings($mappings);
     public function register();
 
 

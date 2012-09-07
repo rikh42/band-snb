@@ -19,6 +19,8 @@ class AutoLoader implements AutoLoaderInterface
 {
     protected $namespaces = array();
     protected $prefix = array();
+    protected $mappings = array();
+
 
     /**
      * @param array $namespaces - an array of namespaces
@@ -36,6 +38,16 @@ class AutoLoader implements AutoLoaderInterface
     public function registerPrefixes($prefixes)
     {
         $this->prefix = array_merge($this->prefix, $prefixes);
+    }
+
+
+    /**
+     * Register direct mappings (eg, classname => pathname)
+     * @param $mappings
+     */
+    public function registerMappings($mappings)
+    {
+        $this->mappings = array_merge($this->mappings, $mappings);
     }
 
     /**
@@ -123,6 +135,14 @@ class AutoLoader implements AutoLoaderInterface
                 if (file_exists($file)) {
                     return $file;
                 }
+            }
+        }
+
+        // Try looking through the direct mappings (normally legacy code)
+        // to see if there is a match there.
+        foreach($this->mappings as $mappedName => $mappedPath) {
+            if ($class == $mappedName) {
+                return $mappedPath;
             }
         }
 
