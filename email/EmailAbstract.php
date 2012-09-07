@@ -118,7 +118,9 @@ class EmailAbstract extends ContainerAware implements EmailInterface
      */
     public function to($email, $name = null)
     {
-        $this->to[] = $this->wrapEmailAddress($email, $name);
+        if ($this->validate($email)) {
+            $this->to[] = $this->wrapEmailAddress($email, $name);
+        }
 
         return $this;
     }
@@ -131,7 +133,9 @@ class EmailAbstract extends ContainerAware implements EmailInterface
      */
     public function cc($email, $name = null)
     {
-        $this->cc[] = $this->wrapEmailAddress($email, $name);
+        if ($this->validate($email)) {
+            $this->cc[] = $this->wrapEmailAddress($email, $name);
+        }
 
         return $this;
     }
@@ -144,7 +148,9 @@ class EmailAbstract extends ContainerAware implements EmailInterface
      */
     public function bcc($email, $name = null)
     {
-        $this->bcc[] = $this->wrapEmailAddress($email, $name);
+        if ($this->validate($email)) {
+            $this->bcc[] = $this->wrapEmailAddress($email, $name);
+        }
 
         return $this;
     }
@@ -158,7 +164,9 @@ class EmailAbstract extends ContainerAware implements EmailInterface
      */
     public function from($email, $name = null)
     {
-        $this->from = $this->wrapEmailAddress($email, $name);
+        if ($this->validate($email)) {
+            $this->from = $this->wrapEmailAddress($email, $name);
+        }
 
         return $this;
     }
@@ -172,7 +180,9 @@ class EmailAbstract extends ContainerAware implements EmailInterface
      */
     public function replyTo($email, $name = null)
     {
-        $this->replyTo = $this->wrapEmailAddress($email, $name);
+        if ($this->validate($email)) {
+            $this->replyTo = $this->wrapEmailAddress($email, $name);
+        }
 
         return $this;
     }
@@ -193,6 +203,21 @@ class EmailAbstract extends ContainerAware implements EmailInterface
     }
 
 
+    /**
+     * Determine is an email address really is an email address
+     * @param $emailAddress
+     * @return bool - true if the email address is valid
+     */
+    protected function validate($emailAddress)
+    {
+        // Check that the email address is really an email address
+        if (filter_var($emailAddress, FILTER_VALIDATE_EMAIL) === FALSE) {
+            return false;
+        }
+
+        // Looks like it is. Yay
+        return true;
+    }
 
     /**
      * Helper function that takes an email address and persons names
