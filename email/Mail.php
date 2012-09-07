@@ -16,19 +16,15 @@ class Mail extends EmailAbstract
 {
     public function send()
     {
-        // prepare the message here, and send it
-        $to = implode(', ', $this->to);
-
         // Create a bit of text to act as the boundary between the different parts
         $boundary = 'Alt_x'.md5(time().uniqid('').'BandEmail').'x';
-        $messageId = "<".uniqid('').">";
 
         // prepare the headers
-        $headers = empty($this->from) ? '' : 'From: '.$this->from. "\r\n";
-        $headers = empty($this->from) ? '' : 'Return-Path: '.$this->from. "\r\n";
-        $headers .= empty($this->replyTo) ? '' : 'Reply-To: '.$this->replyTo."\r\n";
-        $headers .= empty($this->cc) ? '' : 'CC: '.implode(', ', $this->cc)."\r\n";
-        $headers .= empty($this->bcc) ? '' : 'BCC: '.implode(', ', $this->bcc)."\r\n";
+        $headers = empty($this->from) ? '' : 'From: '.$this->from['prepared']. "\r\n";
+        $headers .= empty($this->from) ? '' : 'Return-Path: '.$this->from['prepared']. "\r\n";
+        $headers .= empty($this->replyTo) ? '' : 'Reply-To: '.$this->replyTo['prepared']."\r\n";
+        $headers .= empty($this->cc) ? '' : 'CC: '.$this->getCcList()."\r\n";
+        $headers .= empty($this->bcc) ? '' : 'BCC: '.$this->getBccList()."\r\n";
         $headers .= "X-Mailer: Band Framework\r\n";
         $headers .= "MIME-Version: 1.0\r\n";
         $headers .= "Content-Type: multipart/alternative; boundary=\"$boundary\"\r\n";
@@ -61,6 +57,6 @@ class Mail extends EmailAbstract
         $body.= "--$boundary--\n";
 
         // Send the message
-        $x = mail($to, $this->subject, $body, $headers);
+        mail($this->getToList(), $this->subject, $body, $headers);
     }
 }
