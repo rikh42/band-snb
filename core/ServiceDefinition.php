@@ -95,6 +95,8 @@ class ServiceDefinition extends ContainerAware
     public function setMultiInstance()
     {
         $this->isSingleton = false;
+
+        return $this;
     }
 
 
