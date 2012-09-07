@@ -107,6 +107,10 @@ class Kernel extends ContainerAware implements KernelInterface
             }
         }
 
+        // Finally, let the app have a go, so it can override anything
+        // that the packages above set up.
+        $this->registerServices();
+
         // we're done
         $this->booted = true;
     }
@@ -163,9 +167,6 @@ class Kernel extends ContainerAware implements KernelInterface
         $this->addService('db.migrate', 'snb\core\Migrate')->setArguments(array('::service::database', '::service::logger'))->addCall('ensureMigrationTable');
         $this->addService('cache', 'snb\cache\NullCache');
         $this->addService('email', 'snb\email\NullEmail')->setMultiInstance();
-
-        // Register some app specific services
-        $this->registerServices();
     }
 
 
