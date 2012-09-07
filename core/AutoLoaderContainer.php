@@ -57,5 +57,10 @@ class AutoLoadContainer
     {
         static::$loader->registerPrefixes($prefixes);
     }
+
+    public static function addMappings($mappings)
+    {
+        static::$loader->registerMappings($mappings);
+    }
 }
 
