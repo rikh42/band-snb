@@ -65,11 +65,11 @@ class PostmarkApp extends EmailAbstract
         $data['Subject'] = $this->subject;
         $data['HtmlBody'] = $this->htmlBody;
         $data['TextBody'] = $this->textBody;
-        $data['From'] = $this->from;
-        $data['ReplyTo'] = (empty($this->replyTo)) ? $this->from : $this->replyTo;
-        $data['To'] = implode(', ', $this->to);
-        $data['Cc'] = implode(', ', $this->cc);
-        $data['Bcc'] = implode(', ', $this->bcc);
+        $data['From'] = $this->from['prepared'];
+        $data['ReplyTo'] = (empty($this->replyTo)) ? $this->from['prepared'] : $this->replyTo['prepared'];
+        $data['To'] = $this->getToList();
+        $data['Cc'] = $this->getCcList();
+        $data['Bcc'] = $this->getBccList();
         $data['Tag'] = $this->tag;
 
         // output the appropriate data for attachments ($this->attachments)

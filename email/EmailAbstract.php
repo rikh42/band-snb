@@ -45,6 +45,58 @@ class EmailAbstract extends ContainerAware implements EmailInterface
         $this->attachments = array();
     }
 
+
+
+
+    /**
+     * Get the list of To email addresses, as a comma'ed list
+     * ready for dropping into an email header. eg
+     * Bob Smith <bob@example.com>, Jane Doe <jane@example.com>
+     * @return string
+     */
+    public function getToList()
+    {
+        return $this->getAsList($this->to);
+    }
+
+    /**
+     * Same as getToList, only for the CC list
+     * @return string
+     */
+    public function getCcList()
+    {
+        return $this->getAsList($this->cc);
+    }
+
+
+    /**
+     * Same as getToList, but for the BCC list
+     * @return string
+     */
+    public function getBccList()
+    {
+        return $this->getAsList($this->bcc);
+    }
+
+
+    /**
+     * @param $emails - and array of emails, with email, name and prepared entries
+     * @return string
+     */
+    protected function getAsList($emails)
+    {
+        // Prepare a list with just the prepared email addresses in it
+        $all = array();
+        foreach($emails as $email) {
+            $all[] = $email['prepared'];
+        }
+
+        // build the full list of emails
+        return implode(', ', $all);
+    }
+
+
+
     /**
      * Sets the subject of the email message
      * @param $subject
@@ -66,7 +118,9 @@ class EmailAbstract extends ContainerAware implements EmailInterface
      */
     public function to($email, $name = null)
     {
-        $this->to[] = $this->prepareEmail($email, $name);
+        if ($this->validate($email)) {
+            $this->to[] = $this->wrapEmailAddress($email, $name);
+        }
 
         return $this;
     }
@@ -79,7 +133,9 @@ class EmailAbstract extends ContainerAware implements EmailInterface
      */
     public function cc($email, $name = null)
     {
-        $this->cc[] = $this->prepareEmail($email, $name);
+        if ($this->validate($email)) {
+            $this->cc[] = $this->wrapEmailAddress($email, $name);
+        }
 
         return $this;
     }
@@ -92,7 +148,9 @@ class EmailAbstract extends ContainerAware implements EmailInterface
      */
     public function bcc($email, $name = null)
     {
-        $this->bcc[] = $this->prepareEmail($email, $name);
+        if ($this->validate($email)) {
+            $this->bcc[] = $this->wrapEmailAddress($email, $name);
+        }
 
         return $this;
     }
@@ -106,10 +164,13 @@ class EmailAbstract extends ContainerAware implements EmailInterface
      */
     public function from($email, $name = null)
     {
-        $this->from = $this->prepareEmail($email, $name);
+        if ($this->validate($email)) {
+            $this->from = $this->wrapEmailAddress($email, $name);
+        }
 
         return $this;
     }
+
 
     /**
      * Sets the reply to email address
@@ -119,9 +180,43 @@ class EmailAbstract extends ContainerAware implements EmailInterface
      */
     public function replyTo($email, $name = null)
     {
-        $this->replyTo = $this->prepareEmail($email, $name);
+        if ($this->validate($email)) {
+            $this->replyTo = $this->wrapEmailAddress($email, $name);
+        }
 
         return $this;
+    }
+
+
+    /**
+     * @param $email - An email address
+     * @param $name - the name of the person
+     * @return array - containing email, name and prepared entries
+     */
+    protected function wrapEmailAddress($email, $name=null)
+    {
+        return array(
+            'email' => $email,
+            'name' => $name,
+            'prepared' => $this->prepareEmail($email, $name)
+        );
+    }
+
+
+    /**
+     * Determine is an email address really is an email address
+     * @param $emailAddress
+     * @return bool - true if the email address is valid
+     */
+    protected function validate($emailAddress)
+    {
+        // Check that the email address is really an email address
+        if (filter_var($emailAddress, FILTER_VALIDATE_EMAIL) === FALSE) {
+            return false;
+        }
+
+        // Looks like it is. Yay
+        return true;
     }
 
     /**

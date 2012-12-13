@@ -107,6 +107,10 @@ class Kernel extends ContainerAware implements KernelInterface
             }
         }
 
+        // Finally, let the app have a go, so it can override anything
+        // that the packages above set up.
+        $this->registerServices();
+
         // we're done
         $this->booted = true;
     }
@@ -163,9 +167,6 @@ class Kernel extends ContainerAware implements KernelInterface
         $this->addService('db.migrate', 'snb\core\Migrate')->setArguments(array('::service::database', '::service::logger'))->addCall('ensureMigrationTable');
         $this->addService('cache', 'snb\cache\NullCache');
         $this->addService('email', 'snb\email\NullEmail')->setMultiInstance();
-
-        // Register some app specific services
-        $this->registerServices();
     }
 
 
@@ -179,6 +180,23 @@ class Kernel extends ContainerAware implements KernelInterface
     protected function getConfigName()
     {
         return '::config-'.$this->environment.'.yml';
+    }
+
+
+    /**
+     * @param $name - The name of the config value that you'd like to get
+     * @param $name
+     * @param null $default
+     * @return mixed|null
+     */
+    public function getConfigValue($name, $default=null)
+    {
+        /** @var $config \snb\config\ConfigSettings */
+        $config = $this->container->get('config');
+        if (!$config)
+            return $default;
+
+        return $config->get($name, $default);
     }
 
 
