@@ -184,6 +184,23 @@ class Kernel extends ContainerAware implements KernelInterface
 
 
     /**
+     * @param $name - The name of the config value that you'd like to get
+     * @param $name
+     * @param null $default
+     * @return mixed|null
+     */
+    public function getConfigValue($name, $default=null)
+    {
+        /** @var $config \snb\config\ConfigSettings */
+        $config = $this->container->get('config');
+        if (!$config)
+            return $default;
+
+        return $config->get($name, $default);
+    }
+
+
+    /**
      * gets the current environment (dev, prod, test, etc)
      * @return string
      */
