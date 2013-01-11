@@ -115,14 +115,14 @@ class ServiceDefinition extends ContainerAware
 
 
 
-    /**
-     * create
-     * Create the object for this service if needed.
-     * This will pass the appropriate data to the constructor and
-     * call any additional functions needed to set it up.
-     * @return mixed
-     */
-    public function create(ContainerInterface $container)
+	/**
+	 * Create the object for this service if needed.
+	 * This will pass the appropriate data to the constructor and
+	 * call any additional functions needed to set it up.
+	 * @param ContainerInterface $container
+	 * @return object|ContainerAware
+	 */
+	public function create(ContainerInterface $container)
     {
         // if we already have an object, use it
         if (is_object($this->reference))
@@ -190,6 +190,13 @@ class ServiceDefinition extends ContainerAware
      */
     protected function resolveValue($arg)
     {
+		// Expand values in arrays
+		if (is_array($arg)) {
+			foreach ($arg as &$innerArg) {
+				$innerArg = $this->resolveValue($innerArg);
+			}
+		}
+
         // If it isn't a string, there is nothing to resolve.
         if (!is_string($arg)) {
             return $arg;
