@@ -164,11 +164,12 @@ class ConfigSettings implements ConfigInterface
      * eg array('name' => array('first'=>'bob', 'surname'=>'smith'))
      * becomes name.first => bob, name.surname => smith
      * Also converts all keys to lower case
+	 * @param $server - The $SERVER request params from the request
      * @param array $from - the nested array
      * @param array $flat - the array to store the flattened array in
      * @param null  $path - the current key path
      */
-    protected function flatten($server, array &$from, array &$flat, $path = null)
+	protected function flatten($server, array &$from, array &$flat, $path = null)
     {
         foreach ($from as $key => $value) {
             $key = mb_strtolower($key);
