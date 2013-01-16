@@ -12,6 +12,7 @@ use snb\config\ConfigInterface;
 use snb\core\KernelInterface;
 use snb\exceptions\CircularReferenceException;
 use snb\config\ConfigStoreCompiler;
+use snb\http\RequestParams;
 
 use Symfony\Component\Yaml\Yaml;
 
@@ -128,27 +129,17 @@ class ConfigSettings implements ConfigInterface
             $content = array();
         }
 
-        // Flatten the content down
-        $flat = array();
-        $this->flatten($content, $flat);
-
-        // remap any values that need it
+        // We'll need access to the server paramters in the request
+        // to remap any values that need fetching from the environment
+        $serverParams = null;
         $request = $this->kernel->getContainer()->get('request');
         if ($request) {
-            foreach ($flat as $name => $value) {
-                // See if the value looks like a token
-                if (preg_match('/^%([a-z_]+)%$/i', $value, $regs)) {
-                    $token = $regs[1];
-
-                    // attempt to find the value in the environment
-                    // eg, if the value was %DB_PASSWORD%, we will look for it in $_SERVER
-                    // as DB_PASSWORD or REDIRECT_DB_PASSWORD
-                    $flat[$name] = $request->server->get(
-                        $token,
-                        $request->server->get('REDIRECT_'.$token, $value));
-                }
-            }
+            $serverParams = $request->server;
         }
+
+        // Flatten the content down
+        $flat = array();
+        $this->flatten($serverParams, $content, $flat);
 
         // See if the file includes an import command
         if (array_key_exists('import', $flat)) {
@@ -177,17 +168,52 @@ class ConfigSettings implements ConfigInterface
      * @param array $flat - the array to store the flattened array in
      * @param null  $path - the current key path
      */
-    protected function flatten(array &$from, array &$flat, $path = null)
+    protected function flatten($server, array &$from, array &$flat, $path = null)
     {
         foreach ($from as $key => $value) {
             $key = mb_strtolower($key);
             $newPath = $path ? $path.'.'.$key : $key;
             if (is_array($value)) {
-                $this->flatten($value, $flat, $newPath);
+                $this->flatten($server, $value, $flat, $newPath);
+                $flat[$newPath.'.*'] = $value;
 			} else {
-                $flat[$newPath] = $value;
+                $newValue = $this->remapValue($server, $value);
+                $flat[$newPath] = $newValue;
+                $from[$key] = $newValue;
 			}
         }
+    }
+
+
+    /**
+     * @param $server
+     * @param $value
+     * @return string
+     */
+    protected function remapValue($server, $value)
+    {
+        // If we have no $SERVER arguments, just leave the value along
+        if ($server == null) {
+            return $value;
+        }
+
+        // If it isn't a string, leave it
+        if (!is_string($value)) {
+            return $value;
+        }
+
+        // See if the value looks like a token to be remapped (%NAME%)
+        if (preg_match('/^%([a-z_]+)%$/i', $value, $regs)) {
+            $token = $regs[1];
+
+            // attempt to find the value in the environment
+            // eg, if the value was %DB_PASSWORD%, we will look for it in $_SERVER
+            // as DB_PASSWORD or REDIRECT_DB_PASSWORD
+            return $server->get($token, $server->get('REDIRECT_'.$token, $value));
+        }
+
+        // nothing special, so return the original value unchanged
+        return $value;
     }
 
 

@@ -10,7 +10,6 @@ namespace snb\config;
 
 use snb\config\ConfigSettings;
 use snb\core\KernelInterface;
-use snb\exceptions\CircularReferenceException;
 use snb\config\ConfigStoreCompiler;
 
 use Symfony\Component\Yaml\Yaml;
@@ -52,6 +51,7 @@ class CachedConfigSettings extends ConfigSettings
         // Look for the cached config and try and use that
         if (file_exists($this->configPath)) {
             // The file has been generated and exists, so include it
+            // It contains a class called ConfigStore
             require $this->configPath;
 
             // create the store object and copy the data from it
@@ -98,7 +98,7 @@ class CachedConfigSettings extends ConfigSettings
         $env = preg_replace('/[^a-z]/i', '', $this->kernel->getEnvironment());
 
         // add in the filename of the cache file...
-        $path .= "/ConfigCache.$env.php";
+        $path .= "/cache/ConfigCache.$env.php";
 
         // That should do...
         return $path;

@@ -80,8 +80,32 @@ class ConfigStore implements ConfigStoreInterface
 
 END;
 
-        // Write the content out....
-        file_put_contents($this->path, $output);
+        // Write the file to the cache folder
+        // We attempt to create the cache folder first
+        // (using code from Twig (See copyright below) ∞to create and write the file - the file is written to a tmp file
+        // and then copied over the original)
+        $file = $this->path;
+        $dir = dirname($file);
+        if (!is_dir($dir)) {
+            if (false === @mkdir($dir, 0777, true) && !is_dir($dir)) {
+                throw new RuntimeException(sprintf("Unable to create the cache directory (%s).", $dir));
+            }
+        } elseif (!is_writable($dir)) {
+            throw new RuntimeException(sprintf("Unable to write in the cache directory (%s).", $dir));
+        }
+
+        $tmpFile = tempnam(dirname($file), basename($file));
+        if (false !== @file_put_contents($tmpFile, $output)) {
+            // rename does not work on Win32 before 5.2.6
+            if (@rename($tmpFile, $file) || (@copy($tmpFile, $file) && unlink($tmpFile))) {
+                @chmod($file, 0666 & ~umask());
+
+                return;
+            }
+        }
+
+        // obviously failed to create the file, so fail
+        throw new RuntimeException(sprintf('Failed to write cache file "%s".', $file));
     }
 
 
