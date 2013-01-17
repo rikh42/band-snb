@@ -148,7 +148,7 @@ class ConfigSettings implements ConfigInterface
         }
 
         // replace any items already set in the config, with the items from this file
-        $this->all = array_replace($this->all, $flat);
+        $this->all = array_replace_recursive($this->all, $flat);
 
         // no longer loading this file
         unset($this->loading[$resource]);
