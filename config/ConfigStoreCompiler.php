@@ -88,10 +88,10 @@ END;
         $dir = dirname($file);
         if (!is_dir($dir)) {
             if (false === @mkdir($dir, 0777, true) && !is_dir($dir)) {
-                throw new RuntimeException(sprintf("Unable to create the cache directory (%s).", $dir));
+                throw new \RuntimeException(sprintf("Unable to create the cache directory (%s).", $dir));
             }
         } elseif (!is_writable($dir)) {
-            throw new RuntimeException(sprintf("Unable to write in the cache directory (%s).", $dir));
+            throw new \RuntimeException(sprintf("Unable to write in the cache directory (%s).", $dir));
         }
 
         $tmpFile = tempnam(dirname($file), basename($file));
@@ -105,7 +105,7 @@ END;
         }
 
         // obviously failed to create the file, so fail
-        throw new RuntimeException(sprintf('Failed to write cache file "%s".', $file));
+        throw new \RuntimeException(sprintf('Failed to write cache file "%s".', $file));
     }
 
 
@@ -120,12 +120,9 @@ END;
 
     /**
      * Returns a PHP representation of a given value.
-     *
-     * @param mixed $value The value to convert
-     *
-     * @return Twig_Compiler The current compiler instance
-     */
-    public function repr($value)
+	 * @param $value
+	 */
+	public function repr($value)
     {
         if (is_int($value) || is_float($value)) {
             if (false !== $locale = setlocale(LC_NUMERIC, 0)) {
@@ -144,48 +141,38 @@ END;
         } elseif (is_array($value)) {
             $this->raw('array(');
             $i = 0;
-            foreach ($value as $key => $value) {
+            foreach ($value as $key => $subValue) {
                 if ($i++) {
                     $this->raw(', ');
                 }
                 $this->repr($key);
                 $this->raw(' => ');
-                $this->repr($value);
+                $this->repr($subValue);
             }
             $this->raw(')');
         } else {
             $this->string($value);
         }
-
-        return $this;
     }
 
     /**
      * Adds a quoted string to the compiled code.
      *
      * @param string $value The string
-     *
-     * @return Twig_Compiler The current compiler instance
-     */
-    public function string($value)
+	 * @param $value
+	 */
+	public function string($value)
     {
         $this->source .= sprintf('"%s"', addcslashes($value, "\0\t\"\$\\"));
-
-        return $this;
     }
 
     /**
      * Adds a raw string to the compiled code.
-     *
      * @param string $string The string
-     *
-     * @return Twig_Compiler The current compiler instance
-     */
-    public function raw($string)
+	 */
+	public function raw($string)
     {
         $this->source .= $string;
-
-        return $this;
     }
 
 }
