@@ -145,9 +145,14 @@ class ConfigSettings implements ConfigInterface
         if (array_key_exists('import', $flat)) {
             // Yes, so load that first
             $this->loadResource($flat['import']);
+        } else if (array_key_exists('import.*', $flat)) {
+            foreach($flat['import.*'] as $importResource) {
+                $this->loadResource($importResource);
+            }
         }
 
-        // replace any items already set in the config, with the items from this file
+
+            // replace any items already set in the config, with the items from this file
         $this->all = array_replace_recursive($this->all, $flat);
 
         // no longer loading this file
