@@ -23,8 +23,11 @@ class Route
     protected $regex;			// The regex that will match a url for this route
     protected $vars;
     protected $matchedArgs;
-    protected $controllerClass;
-    protected $controllerAction;
+
+    protected $className;       // The name of the controller class to use
+    protected $classAction;     // The name of the action function in the class to call
+    protected $controller;      // the name of the controller, without Controller on the end.
+    protected $action;          // The name of the action, without Action on the end
 
     /**
      * @param $name
@@ -43,8 +46,8 @@ class Route
         $this->vars = array();
         $this->matchedArgs = array();
         $this->regex = false;
-        $this->controllerClass = null;
-        $this->controllerAction = null;
+        $this->className = null;
+        $this->classAction = null;
     }
 
     /**
@@ -140,31 +143,26 @@ class Route
     }
 
     /**
-     * getController
-     * @return mixed
+     * Gets the name of the class for the controller
+     * @return string
      */
-    public function getController()
+    public function getControllerClass()
     {
-        if ($this->controllerClass==null) {
-            $this->refreshControllerInfo();
-        }
-
-        return $this->controllerClass;
+        $this->refreshControllerInfo();
+        return $this->className;
     }
+
 
     /**
-     * refreshControllerInfo
-     * Updates the controller class name and action name from the
-     * colon separated text from the yml file
+     * Returns the clean name of the controller
+     * @return string
      */
-    protected function refreshControllerInfo()
+    public function getControllerName()
     {
-        if ($this->controllerClass==null) {
-            $parts = preg_split('/:/', $this->options['controller']);
-            $this->controllerClass = $parts[0].'\\controllers\\'.$parts[1];
-            $this->controllerAction = $parts[2].'Action';
-        }
+        $this->refreshControllerInfo();
+        return $this->controller;
     }
+
 
     /**
      * Returns the list of matched arguments
@@ -179,14 +177,56 @@ class Route
      * Returns the name of the action on the controller to call
      * @return string
      */
-    public function getAction()
+    public function getActionMethod()
     {
-        if ($this->controllerAction==null) {
-            $this->refreshControllerInfo();
+        $this->refreshControllerInfo();
+        return $this->classAction;
+    }
+
+
+    /**
+     * Gets the name of the action (without the word Action on the end)
+     * @return string
+     */
+    public function getActionName()
+    {
+        $this->refreshControllerInfo();
+        return $this->action;
+    }
+
+
+
+    /**
+     * refreshControllerInfo
+     * Updates the controller class name and action name from the
+     * colon separated text from the yml file
+     */
+    protected function refreshControllerInfo()
+    {
+        // If we have already done the work, don't do it again
+        if ($this->className!=null) {
+            return;
         }
 
-        return $this->controllerAction;
+        // Break up the controller option into its parts
+        $parts = preg_split('/:/', $this->options['controller']);
+
+        // Build out the names of the class and function in the class
+        $this->className = $parts[0].'\\controllers\\'.$parts[1];
+        $this->classAction = $parts[2].'Action';
+
+        // Also remember the clean names of the controller and action
+        $this->action = $parts[2];
+
+        // Try and remove Controller from the name...
+        if (preg_match("/(.*)Controller/ui", $parts[1], $regs) == 1) {
+            $this->controller = $regs[1];
+        } else {
+            $this->controller = $parts[1];
+        }
     }
+
+
 
     /**
      * generates a full url for this route, given the provided arguments

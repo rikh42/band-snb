@@ -516,8 +516,8 @@ class Kernel extends ContainerAware implements KernelInterface
 
             // Find info on the controller we'll need to call
 			$this->setRouteData($route);
-            $controllerName = $route->getController();
-            $actionName = $route->getAction();
+            $controllerName = $route->getControllerClass();
+            $actionName = $route->getActionMethod();
             $args = $route->getArguments();
 
             // try and create the controller

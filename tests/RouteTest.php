@@ -29,8 +29,8 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 
         // Check various getters
         $this->assertEquals($r->getName(), 'blogtest');
-        $this->assertEquals($r->getAction(), 'helloAction');
-        $this->assertEquals($r->getController(), 'example\\controllers\\DemoController');
+        $this->assertEquals($r->getActionMethod(), 'helloAction');
+        $this->assertEquals($r->getControllerClass(), 'example\\controllers\\DemoController');
         $this->assertEquals($r->getMethod(), 'GET');
         $this->assertEquals($r->getOption('method'), 'GET');
         $this->assertEquals($r->getOption('madeupcrap'), null);
@@ -48,10 +48,10 @@ class RouteTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($r->isMatch('/blog/42/testing-routes', $request));
 
         // test that the controller is as expected
-        $this->assertEquals($r->getController(), 'example\controllers\DemoController');
+        $this->assertEquals($r->getControllerClass(), 'example\controllers\DemoController');
 
         // test that the action is a match
-        $this->assertEquals($r->getAction(), 'helloAction');
+        $this->assertEquals($r->getActionMethod(), 'helloAction');
 
         // test that the arguments are good
         $arguments = $r->getArguments();
