@@ -23,6 +23,7 @@ class Route
     protected $regex;			// The regex that will match a url for this route
     protected $vars;
     protected $matchedArgs;
+    protected $matchedUri;
 
     protected $className;       // The name of the controller class to use
     protected $classAction;     // The name of the action function in the class to call
@@ -45,6 +46,7 @@ class Route
         $this->defaults = $defaults;
         $this->vars = array();
         $this->matchedArgs = array();
+        $this->matchedUri = '';
         $this->regex = false;
         $this->className = null;
         $this->classAction = null;
@@ -91,6 +93,46 @@ class Route
         return $default;
     }
 
+
+    /**
+     * Gets a key to use to cache the response, or null if caching is disabled for this route
+     * @return null|string
+     */
+    public function getCacheKey()
+    {
+        // See if there is a cache option
+        $cacheFor = $this->getOption('cachefor');
+        if ($cacheFor == null)
+            return null;
+
+        // We do want to cache, so generate a key
+        $key = 'outputcache'.$this->matchedUri;
+
+        // Look for any 'vary by' options and add stuff to the key based on that
+
+        // return the key
+        return $key;
+    }
+
+
+    /**
+     * Find out how long the response for this route wants to be cached for.
+     * The time is in seconds.
+     * @return int
+     */
+    public function getCacheDuration()
+    {
+        // Set a default (anything less than a minute is a waste of time)
+        $cacheFor = (int) $this->getOption('cachefor', 0);
+        if ($cacheFor < 60) {
+            $cacheFor = 60;
+        }
+
+        return $cacheFor;
+    }
+
+
+
     /**
      * isMatch
      * Trys to match the url of the request to this route
@@ -125,18 +167,19 @@ class Route
         $p = array();
         foreach ($this->vars as $key=>$name) {
             // copy over the default value if there is one
-            if (key_exists($name, $this->defaults)) {
+            if (array_key_exists($name, $this->defaults)) {
                 $p[$name] = $this->defaults[$name];
             }
 
             // replace it with the value from url, if it was included
-            if (key_exists($key + 1, $regs)) {
+            if (array_key_exists($key + 1, $regs)) {
                 $p[$name] = $regs[$key + 1];
             }
         }
 
         // remember these, as someone it likely to want them very soon
         $this->matchedArgs = $p;
+        $this->matchedUri = $request->getUri();
 
         // This route was a match
         return true;

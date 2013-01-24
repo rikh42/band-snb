@@ -514,6 +514,19 @@ class Kernel extends ContainerAware implements KernelInterface
                 $route = $routeEvent->getRoute();
             }
 
+            // Try and return a cached version of the page, before we do any real work
+            $cache = null;
+            $cacheKey = $route->getCacheKey();
+            if ($cacheKey)
+            {
+                // Caching for the page is enabled, so try and look it up in the cache
+                $cache = $this->container->get('cache');
+                $response = $cache->get($cacheKey);
+                if ($response) {
+                    return $response;
+                }
+            }
+
             // Find info on the controller we'll need to call
 			$this->setRouteData($route);
             $controllerName = $route->getControllerClass();
@@ -561,10 +574,20 @@ class Kernel extends ContainerAware implements KernelInterface
                 }
             }
 
-            // Return the processed response
-            return $this->postProcessResponse($response);
+            // Finally, perform any post-processing to the response
+            $response = $this->postProcessResponse($response);
+
+            // If we are caching the response, then do it now...
+            if ($cacheKey && $cache) {
+                $cache->set($cacheKey, $response, $route->getCacheDuration());
+            }
+
+            // finally return the response, ready to be sent to the client
+            return $response;
+
         } catch (\Exception $e) {
             // Send out an exception response event
+            // Obviously we don't cache exception responses...
             return $this->handleExceptionResponse($e, $request);
         }
     }
