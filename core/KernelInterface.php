@@ -16,8 +16,14 @@ interface KernelInterface
     public function findPath($name);
     public function findResource($name, $type);
     public function handle(Request $request);
-    public function getEnvironment();
-    public function isDebug();
+
+	public function isDebug();
+
+	public function getEnvironment();
+	public function getSession();
+	public function getRequest();
+	public function getConfigValue($name, $default = null);
+	public function getRouteData();
 
     /**
      * @param string $name - the name of the service to add
@@ -25,6 +31,7 @@ interface KernelInterface
      * @return ServiceDefinition
      */
     public function addService($name, $ref);
+	public function addServiceAlias($name, $alias);
     public function addModel($name, $ref);
     public function getContainer();
 }

@@ -16,7 +16,7 @@ use snb\core\ContainerInterface;
 class ContainerAware implements ContainerAwareInterface
 {
     /**
-     * @var snb\core\ContainerInterface
+     * @var \snb\core\ContainerInterface
      */
     public $container;
 

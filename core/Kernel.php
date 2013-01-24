@@ -19,12 +19,14 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use snb\events\RequestEvent;
 use snb\events\RouteEvent;
+use snb\routing\Route;
 use snb\events\ResponseEvent;
 use snb\events\NoResponseFromControllerEvent;
 use snb\events\ExceptionOnRequestEvent;
 use snb\exceptions\PageNotFoundException;
 use snb\errors\ErrorHandler;
 use snb\errors\ExceptionHandler;
+
 
 /**
  * Kernel
@@ -39,6 +41,7 @@ class Kernel extends ContainerAware implements KernelInterface
     protected $environment;
     protected $packages;
     protected $logger;
+	protected $route;
 
     /**
      * set up the Kernel
@@ -63,6 +66,9 @@ class Kernel extends ContainerAware implements KernelInterface
         $this->setContainer(new ServiceContainer());
         $this->logger = new Logger(new BufferedHandler());
         $this->logger->logTime('Creating Kernel');
+
+		// Clear the route
+		$this->route = null;
     }
 
     /**
@@ -308,6 +314,25 @@ class Kernel extends ContainerAware implements KernelInterface
     }
 
 
+	/**
+	 * Gets the current route being used
+	 * @return \snb\routing\Route | null
+	 */
+	public function getRouteData()
+	{
+		return $this->route;
+	}
+
+
+	/**
+	 * Sets the current route
+	 * @param \snb\routing\Route $route
+	 */
+	protected function setRouteData(Route $route)
+	{
+		$this->route = $route;
+	}
+
     /**
      * Finds the path of the named package, or the app path if no package is given
      * @param $name
@@ -464,6 +489,7 @@ class Kernel extends ContainerAware implements KernelInterface
             }
 
             // load routes and find the route
+			/** @var $routes \snb\routing\RouteCollection */
             $routes = $this->container->get('routes');
             $routes->load();
 
@@ -489,6 +515,7 @@ class Kernel extends ContainerAware implements KernelInterface
             }
 
             // Find info on the controller we'll need to call
+			$this->setRouteData($route);
             $controllerName = $route->getController();
             $actionName = $route->getAction();
             $args = $route->getArguments();
