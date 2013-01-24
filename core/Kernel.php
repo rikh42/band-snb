@@ -154,7 +154,8 @@ class Kernel extends ContainerAware implements KernelInterface
         $this->addService('routes', 'snb\routing\RouteCollection');
         $this->addService('event-dispatcher', new EventDispatcher);
         $this->addService('logger', $this->logger);
-        $this->addService('template.engine', 'snb\view\TwigView');
+        $this->addService('view', 'snb\view\TwigView');
+		$this->addServiceAlias('template.engine', 'view');
         $this->addService('database', 'snb\core\Database')->addCall('init', array());
         $this->addService('session', 'snb\http\SessionStorage')->addCall('start');
         $this->addService('auth', 'snb\security\Auth')->setArguments(array('::service::auth.token', '::service::auth.context', '::service::event-dispatcher'));
@@ -261,6 +262,18 @@ class Kernel extends ContainerAware implements KernelInterface
 
         return $service;
     }
+
+
+	/**
+	 * Allows you to make an alias to another service
+	 * @param $name - the name of the new service
+	 * @param $alias - the name of the service to use in $name's place
+	 */
+	public function addServiceAlias($name, $alias)
+	{
+		$serviceName = (string) $alias;
+		$this->container->set($name, $serviceName);
+	}
 
 
 

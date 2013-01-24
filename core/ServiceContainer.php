@@ -51,18 +51,26 @@ class ServiceContainer implements ContainerInterface
         }
     }
 
-    /**
-     * get
-     * Get the named service object. If it hasn't been created yet, it will be created
-     * @param  string      $name - the name of the service you want
-     * @return object|null
-     */
-    public function get($name)
+
+
+	/**
+	 * get
+	 * Get the named service object. If it has not been created yet, it will be created
+	 * @param $name
+	 * @return null|object|ContainerAware
+	 * @throws \snb\exceptions\CircularReferenceException
+	 */
+	public function get($name)
     {
         // if the feature exists, return it
         if (array_key_exists($name, $this->services)) {
             // get the named object
             $object = $this->services[$name];
+
+			// see if it is an alias to another service
+			if (is_string($object)) {
+				return $this->get($object);
+			}
 
             // If the object has already been created and set up, return it.
             if (!($object instanceof ServiceDefinition)) {
@@ -92,6 +100,7 @@ class ServiceContainer implements ContainerInterface
         // else nothing
         return null;
     }
+
 
 
     /**

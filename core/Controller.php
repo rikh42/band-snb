@@ -40,7 +40,7 @@ class Controller extends ContainerAware
      */
     public function render($name, array $data = array())
     {
-        return $this->container->get('template.engine')->render($name, $data);
+        return $this->container->get('view')->render($name, $data);
     }
 
     /**
@@ -99,7 +99,7 @@ class Controller extends ContainerAware
      */
     public function getView()
     {
-        return $this->container->get('template.engine');
+        return $this->container->get('view');
     }
 
     /**
