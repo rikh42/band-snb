@@ -55,6 +55,14 @@ class TwigView extends ContainerAware implements ViewInterface
         $twig->addGlobal('app', $kernel);
 
         // Add all the extensions that have been registered with the service provider
+        $globals = $this->container->getMatching('twig.global.*');
+        foreach ($globals as $global) {
+            if ($global instanceof ViewGlobalInterface) {
+                $twig->addGlobal($global->getGlobalName(), $global);
+            }
+        }
+
+        // Add all the extensions that have been registered with the service provider
         $extensions = $this->container->getMatching('twig.extension.*');
         foreach ($extensions as $ext) {
             $twig->addExtension($ext);
