@@ -94,6 +94,20 @@ class Controller extends ContainerAware
         return $response;
     }
 
+
+    /**
+     * @param $name
+     * @param array $args
+     */
+    public function getUrlForRoute($routeName, $args=array(), $fullyQualified=false)
+    {
+        // Find the route mentioned
+        $routes = $this->getRoutes();
+        return $routes->generate($routeName, $args, $fullyQualified);
+    }
+
+
+
     /**
      * @return \snb\view\ViewInterface
      */
@@ -135,7 +149,7 @@ class Controller extends ContainerAware
     }
 
     /**
-     * @return snb\form\FormBuilder
+     * @return \snb\form\FormBuilder
      */
     public function getFormBuilder()
     {
@@ -143,7 +157,7 @@ class Controller extends ContainerAware
     }
 
     /**
-     * @return snb\security\Auth
+     * @return \snb\security\Auth
      */
     public function getAuth()
     {
