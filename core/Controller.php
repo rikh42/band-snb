@@ -96,8 +96,41 @@ class Controller extends ContainerAware
 
 
     /**
-     * @param $name
+     * Redirect to a specific URL (not a named route)
+     * Ideally should be a fully qualified URl (http://blar.com/etc.htm), but a relative URL
+     * is also OK (/etc.htm) as we add the current requests http host to it first.
+     * @param $url
+     * @param \snb\http\Response $response
+     */
+    public function redirectUrlResponse($url, Response $response = null)
+    {
+        // create a response, if one wasn't provided
+        if ($response == null) {
+            $response = new Response();
+        }
+
+        // If the URL appears to be a relative URL (/some/path/test.png)
+        if (preg_match("/^/[^/]/ui", $url) == 1)
+        {
+            // Add in the protocol and host
+            $request = $this->container->get('request');
+            if ($request) {
+                $url = $request->getHttpHost() . $url;
+            }
+        }
+
+        // finally, set the redirection
+        $response->setRedirectToURL($url);
+    }
+
+
+
+    /**
+     * Get the URL for the named route.
+     * @param $routeName
      * @param array $args
+     * @param bool $fullyQualified
+     * @return string
      */
     public function getUrlForRoute($routeName, $args=array(), $fullyQualified=false)
     {
