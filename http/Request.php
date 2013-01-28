@@ -20,7 +20,7 @@ use snb\http\SessionStorageInterface;
 class Request
 {
     /**
-     * @var RequestParams $get - get request params
+     * @var RequestParams $queryString - get request params
      * @var RequestParams $post - posted params
      * @var RequestParams $server - server params
      * @var RequestParams $cookies - The request cookie
@@ -29,7 +29,7 @@ class Request
      * @var SessionStorageInterface $session - the session (if there is one)
      * @var bool $trustProxy - do we trust proxy redirections
      */
-    public $get;
+    public $queryString;
     public $post;
     public $server;
     public $cookies;
@@ -37,6 +37,9 @@ class Request
     public $headers;
     protected $session;
     protected $trustProxy;
+
+    // deprecated - Name changed to queryString
+    public $get;
 
     //==============================
     // __construct
@@ -55,12 +58,15 @@ class Request
      */
     protected function init($get, $post, $server, $cookies, $files)
     {
-        $this->get = new RequestParams($get);
+        $this->queryString = new RequestParams($get);
         $this->post = new RequestParams($post);
         $this->server = new RequestParams($server);
         $this->cookies = new RequestParams($cookies);
         $this->headers = new RequestHeaders($server);
         $this->files = new RequestFiles($files);
+
+        // deprecated - Old name for queryString...
+        $this->get = $this->queryString;
 
         // no session by default.
         $this->session = null;

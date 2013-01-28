@@ -251,7 +251,7 @@ class FormType extends AbstractType
                 break;
 
             case 'GET':
-                $data = $request->get->get($this->get('name'), array());
+                $data = $request->queryString->get($this->get('name'), array());
                 break;
         }
 

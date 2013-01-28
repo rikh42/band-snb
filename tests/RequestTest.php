@@ -85,11 +85,11 @@ class RequestTest extends \PHPUnit_Framework_TestCase
     public function testGetArguments()
     {
         $request = Request::create('http://www.example.com/blog/42/testing-routes');
-        $get = $request->get;
+        $get = $request->queryString;
         $this->assertEquals($get->count(), 0);
 
         $request = Request::create('blog/42', 'GET', array('x'=>42, 'long_name'=>'Lots of data here'));
-        $get = $request->get;
+        $get = $request->queryString;
         $this->assertEquals($get->count(), 2);
         $this->assertEquals($request->post->count(), 0);
         $this->assertTrue($get->has('x'));
@@ -97,7 +97,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($get->has('y'));
 
         $request = Request::create('blog/42', 'GET', array('x'=>42, 'y'=>'42 text message! £3.40 #trouble'));
-        $get = $request->get;
+        $get = $request->queryString;
         $x = $get->get('x');
         $this->assertEquals($x, 42);
 
