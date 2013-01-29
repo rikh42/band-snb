@@ -35,7 +35,7 @@ class Database extends ContainerAware implements DatabaseInterface
     protected $activeConnection;
 
     /**
-     * @var snb\logger\LoggerInterface
+     * @var \snb\logger\LoggerInterface
      */
     protected $logger;
 
@@ -205,6 +205,11 @@ class Database extends ContainerAware implements DatabaseInterface
 
         // Try and match the arguments to the list
         foreach ($params as $key=>$value) {
+			// If the value is a DateTime object, then convert it to a MySQL friendly string
+			if ($value instanceof \DateTime) {
+				$value = $value->format('YmdHis');
+			}
+
             // check each parameter and bind any that appear valid
             if (preg_match('/^([a-z]+)(:[a-z0-9_]+)$/iu', $key, $regs)) {
                 // Check that this var is in the list of items needing to be bound
