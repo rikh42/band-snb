@@ -50,6 +50,18 @@ class ConfigSettings implements ConfigInterface
         return $this->all[$name];
     }
 
+
+    /**
+     * Get all the config...
+     * @return array
+     */
+    public function all()
+    {
+        return $this->all;
+    }
+
+
+
     /**
      * Sets a named value
      * @param string $name
@@ -174,20 +186,23 @@ class ConfigSettings implements ConfigInterface
      * @param array $flat - the array to store the flattened array in
      * @param null  $path - the current key path
      */
-	protected function flatten($server, array &$from, array &$flat, $path = null)
+	protected function flatten($server, array $from, array &$flat, $path = null)
     {
+        $output = array();
         foreach ($from as $key => $value) {
             $key = mb_strtolower($key);
             $newPath = $path ? $path.'.'.$key : $key;
             if (is_array($value)) {
-                $this->flatten($server, $value, $flat, $newPath);
-                $flat[$newPath.'.*'] = $value;
+                $output[$key] = $this->flatten($server, $value, $flat, $newPath);
+                $flat[$newPath.'.*'] = $output[$key];
 			} else {
                 $newValue = $this->remapValue($server, $value);
                 $flat[$newPath] = $newValue;
-                $from[$key] = $newValue;
+                $output[$key] = $newValue;
 			}
         }
+
+        return $output;
     }
 
 
@@ -209,7 +224,7 @@ class ConfigSettings implements ConfigInterface
         }
 
         // See if the value looks like a token to be remapped (%NAME%)
-        if (preg_match('/^%([a-z_]+)%$/i', $value, $regs)) {
+        if (preg_match('/^%([a-z0-9_]+)%$/i', $value, $regs)) {
             $token = $regs[1];
 
             // attempt to find the value in the environment

@@ -14,5 +14,6 @@ interface ConfigInterface
     public function set($name, $value);
     public function has($name);
     public function remove($name);
+    public function all();
     public function clearCache();
 }
