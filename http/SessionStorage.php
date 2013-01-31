@@ -9,11 +9,13 @@
 namespace snb\http;
 
 use snb\http\SessionStorageInterface;
+use snb\core\ContainerAware;
+
 
 /**
  * Handles session storage
  */
-class SessionStorage implements SessionStorageInterface
+class SessionStorage extends ContainerAware implements SessionStorageInterface
 {
     protected $started;
     protected $flashMessages;
@@ -41,9 +43,18 @@ class SessionStorage implements SessionStorageInterface
             return;
         }
 
-        // Set the name of the session to something other than PHPSESSION
-        //session_name('snb');
-        session_start();
+		// Look up some session setting from the config
+		$config = $this->container->get('config');
+		$lifetime = $config->get('session.lifetime', ini_get('session.cookie_lifetime'));
+		$path = $config->get('session.path', ini_get('session.cookie_path'));
+		$domain = $config->get('session.domain', ini_get('session.cookie_domain'));
+		$secure = $config->get('session.secure', ini_get('session.cookie_secure'));
+		$httpOnly = $config->get('session.httponly', ini_get('session.cookie_httponly'));
+		session_set_cookie_params($lifetime, $path, $domain, $secure, $httpOnly);
+
+        // Set the name of the session to something other than PHPSESSID
+		session_name($config->get('session.name', 'band'));
+		session_start();
         $this->started = true;
 
         // Pull the flash messages out of the session
