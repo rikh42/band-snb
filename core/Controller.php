@@ -66,6 +66,26 @@ class Controller extends ContainerAware
     }
 
 
+    /**
+     * Made it simpler to respond with json from a controller
+     * @param $data
+     * @param \snb\http\Response $response
+     * @return \snb\http\Response
+     */
+    public function jsonResponse($data, Response $response=null)
+    {
+        // create a response, if one wasn't provided
+        if ($response==null) {
+            $response = new Response();
+        }
+
+        // render the view into the response and return it
+        $response->setContentJson($data);
+        $response->setContentTypeSimple('json');
+        return $response;
+    }
+
+
 
     /**
      * Creates or updates a response to be a redirect to the named route
