@@ -527,52 +527,8 @@ class Kernel extends ContainerAware implements KernelInterface
                 }
             }
 
-            // Find info on the controller we'll need to call
-			$this->setRouteData($route);
-            $controllerName = $route->getControllerClass();
-            $actionName = $route->getActionMethod();
-            $args = $route->getArguments();
-
-            // try and create the controller
-            $controller = new $controllerName();
-            if ($controller instanceof ContainerAware) {
-                $controller->setContainer($this->container);
-            }
-
-            // Optionally call the init function, if it exists.
-            // This has the power to abort calling the action as well
-            $response = null;
-            $callAction = true;
-            if (method_exists($controller, 'init')) {
-                $callAction = $controller->init();
-            }
-
-            // call the action on the controller - if it exists
-            if (($callAction) && (method_exists($controller, $actionName))) {
-                $response = call_user_func_array(array($controller, $actionName), $args);
-            } else {
-                // The action did not exist. Should make this clear in the error
-                throw new PageNotFoundException("No valid action found in controller ($controllerName -> $actionName)");
-            }
-
-            // If we didn't get a response object, send out an event to try and get one
-            if (!$response instanceof Response) {
-                // Send out an event to try and get a response
-                $event = new NoResponseFromControllerEvent($request, $response, $this, $route);
-                $dispatcher->dispatch('kernel.missingresponse', $event);
-
-                // Did we get one?
-                if ($event->hasResponse()) {
-                    $response = $event->getResponse();
-                }
-
-                // Do we have a valid response now?
-                if (!$response instanceof Response) {
-                    // we don't have a valid response from the controller
-                    // so throw an exception
-                    throw new \LogicException('Controller ('.$controllerName.' -> '.$actionName.') failed to return a response');
-                }
-            }
+            // Try and render the route and turn it into a response
+            $response = $this->forwardToRoute($route);
 
             // Finally, perform any post-processing to the response
             $response = $this->postProcessResponse($response);
@@ -591,6 +547,73 @@ class Kernel extends ContainerAware implements KernelInterface
             return $this->handleExceptionResponse($e, $request);
         }
     }
+
+
+    /**
+     * Renders a route to a response
+     * @param \snb\routing\Route $route
+     * @return \snb\http\Response
+     * @throws \LogicException
+     * @throws \snb\exceptions\PageNotFoundException
+     */
+    public function forwardToRoute(Route $route)
+    {
+        // Find info on the controller we'll need to call
+        $this->setRouteData($route);
+        $controllerName = $route->getControllerClass();
+        $actionName = $route->getActionMethod();
+        $args = $route->getArguments();
+
+        // try and create the controller
+        $controller = new $controllerName();
+        if ($controller instanceof ContainerAware) {
+            $controller->setContainer($this->container);
+        }
+
+        // Optionally call the init function, if it exists.
+        // This has the power to abort calling the action as well
+        $response = null;
+        $callAction = true;
+        if (method_exists($controller, 'init')) {
+            $callAction = $controller->init();
+        }
+
+        // call the action on the controller - if it exists
+        if (($callAction) && (method_exists($controller, $actionName))) {
+            $response = call_user_func_array(array($controller, $actionName), $args);
+        } else {
+            // The action did not exist. Should make this clear in the error
+            throw new PageNotFoundException("No valid action found in controller ($controllerName -> $actionName)");
+        }
+
+        // If we didn't get a response object, send out an event to try and get one
+        if (!$response instanceof Response) {
+            $dispatcher = $this->getDispatcher();
+            $request = $this->getRequest();
+
+            // Send out an event to try and get a response
+            $event = new NoResponseFromControllerEvent($request, $response, $this, $route);
+            $dispatcher->dispatch('kernel.missingresponse', $event);
+
+            // Did we get one?
+            if ($event->hasResponse()) {
+                $response = $event->getResponse();
+            }
+
+            // Do we have a valid response now?
+            if (!$response instanceof Response) {
+                // we don't have a valid response from the controller
+                // so throw an exception
+                throw new \LogicException('Controller ('.$controllerName.' -> '.$actionName.') failed to return a response');
+            }
+        }
+
+        // return the response we have
+        return $response;
+    }
+
+
+
 
     /**
      * Sends out a message that allows systems to modify a response prior to it being sent

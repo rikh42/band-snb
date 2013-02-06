@@ -8,6 +8,7 @@
 
 namespace snb\core;
 use \snb\http\Request;
+use snb\routing\Route;
 
 interface KernelInterface
 {
@@ -16,6 +17,7 @@ interface KernelInterface
     public function findPath($name);
     public function findResource($name, $type);
     public function handle(Request $request);
+    public function forwardToRoute(Route $route);
 
 	public function isDebug();
 
