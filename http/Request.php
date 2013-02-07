@@ -19,26 +19,30 @@ use snb\http\SessionStorageInterface;
 //==============================
 class Request
 {
-    /**
-     * @var RequestParams $queryString - get request params
-     * @var RequestParams $post - posted params
-     * @var RequestParams $server - server params
-     * @var RequestParams $cookies - The request cookie
-     * @var RequestHeaders $headers - request headers
-     * @var RequestFiles $files - request files
-     * @var SessionStorageInterface $session - the session (if there is one)
-     * @var bool $trustProxy - do we trust proxy redirections
-     */
-    public $queryString;
+	/** @var RequestParams - GET request params */
+	public $queryString;
+
+	/** @var RequestParams - POST request params */
     public $post;
+
+	/** @var RequestParams - SERVER request params */
     public $server;
+
+	/** @var RequestParams - Cookies */
     public $cookies;
+
+	/** @var RequestFiles - Uploaded file information */
     public $files;
+
+	/** @var RequestHeaders - Request Header info */
     public $headers;
+
+	/** @var RequestParams - The request body */
+	public $body;
     protected $session;
     protected $trustProxy;
 
-    // deprecated - Name changed to queryString
+	/** @var RequestParams - deprecated. Old name for queryString */
     public $get;
 
     //==============================
@@ -64,9 +68,25 @@ class Request
         $this->cookies = new RequestParams($cookies);
         $this->headers = new RequestHeaders($server);
         $this->files = new RequestFiles($files);
+		$this->body = new RequestParams(array('raw'=>''));
 
         // deprecated - Old name for queryString...
         $this->get = $this->queryString;
+
+		// Deal with the body of the request if there was one.
+		if ($this->getContentLength() > 0) {
+			//Read the body from the input stream (can only be read once...)
+			$body = @file_get_contents('php://input');
+			if (!$body) {
+				$body = '';
+			}
+
+			// If the body is encoded as json, convert it to a PHP object
+			$this->body->addItem('raw', $body);
+			if ($this->getMediaType() == 'application/json') {
+				$this->body->addMany(json_decode($body, true));
+			}
+		}
 
         // no session by default.
         $this->session = null;
@@ -95,14 +115,15 @@ class Request
     /**
      * Creates a request object that matches your params
      * @static
-     * @param $uri
-     * @param string $method
-     * @param array  $parameters
-     * @param array  $server
-     * @param array  $cookies
-     * @param array  $files
-     */
-    public static function create($uri, $method='GET', $parameters=array(), $server=array(), $cookies=array(), $files=array())
+	 * @param $uri
+	 * @param string $method
+	 * @param array $parameters
+	 * @param array $server
+	 * @param array $cookies
+	 * @param array $files
+	 * @return Request
+	 */
+	public static function create($uri, $method='GET', $parameters=array(), $server=array(), $cookies=array(), $files=array())
     {
         // Some defaults for a fake request
         $defaults = array(
@@ -389,6 +410,73 @@ class Request
     {
         return mb_strtoupper($this->server->get('REQUEST_METHOD'));
     }
+
+
+	/**
+	 * Gets the content type for the request
+	 * @return mixed
+	 */
+	public function getContentType()
+	{
+		return $this->server->get('CONTENT_TYPE');
+	}
+
+
+	/**
+	 * Gets the media type of the request
+	 * @return null|string
+	 */
+	public function getMediaType()
+	{
+		$contentType = $this->getContentType();
+		if (!empty($contentType)) {
+			$parts = preg_split('/\s*[;,]\s*/', $contentType);
+			return strtolower($parts[0]);
+		}
+
+		return null;
+	}
+
+
+	/**
+	 * Get the character set of the content
+	 * @return null
+	 */
+	public function getContentCharset()
+	{
+		$contentType = $this->getContentType();
+		if (!empty($contentType))
+		{
+			// break it up into parts
+			$parts = preg_split('/\s*[;,]\s*/', $contentType);
+			$partCount = count($parts);
+			for ($i=1; $i<$partCount; $i++)
+			{
+				// Each part we check should look like Name=Value. Break that up
+				$args = explode('=', $parts[$i]);
+
+				// If this is the "charset" item, return it
+				if (strtolower($args[0]) == 'charset') {
+					return $args[1];
+				}
+			}
+		}
+
+		return null;
+	}
+
+
+	/**
+	 * Get the length of the content
+	 * @return mixed
+	 */
+	public function getContentLength()
+	{
+		return $this->server->getInt('CONTENT_LENGTH');
+	}
+
+
+
 
     //==============================
     // hasSession
