@@ -21,7 +21,9 @@ use \PDOException;
 //=====================================
 class Database extends ContainerAware implements DatabaseInterface
 {
-    // Class data begins properly here.
+    /**
+     * @var \PDO
+     */
     protected $pdo = null;
 
     // info about the last query
@@ -33,6 +35,7 @@ class Database extends ContainerAware implements DatabaseInterface
     // Connection info
     protected $connections;
     protected $activeConnection;
+    protected $inTransaction;
 
     /**
      * @var \snb\logger\LoggerInterface
@@ -57,6 +60,7 @@ class Database extends ContainerAware implements DatabaseInterface
 
         $this->connections = array();
         $this->activeConnection = 'none';
+        $this->inTransaction = false;
         $this->logger = null;
     }
 
@@ -129,6 +133,11 @@ class Database extends ContainerAware implements DatabaseInterface
         if ($this->pdo != null) {
             return;
 		}
+
+        // If we are in the middle of a transaction, don't allow the connection to be changed
+        if ($this->inTransaction) {
+            throw new \RuntimeException("Attempt to change database connection while in the middle of a transaction");
+        }
 
         // We have a connection. Has it already been set up?
         $info = $this->connections[$this->activeConnection];
@@ -407,4 +416,69 @@ class Database extends ContainerAware implements DatabaseInterface
         return $this->lastInsertID;
     }
 
+
+    /**
+     * Starts a transaction on the database.
+     * You must call commitTransaction() or rollBackTransaction() soon after calling this...
+     * @return bool
+     * @throws \RuntimeException
+     */
+    public function beginTransaction()
+    {
+        // if the db connection failed, fail right back...
+        $this->enableActiveConnection();
+        if (!$this->pdo) {
+            // we can't start a transaction without a PDO connection
+            // throwing an exception is more likely to prevent the actual queries from being executed...
+            throw new \RuntimeException("Tried to start a transaction without a valid connection");
+        }
+
+        // check we are not already in a transaction
+        if ($this->inTransaction) {
+            throw new \RuntimeException("beginTransaction called when we are already in a transaction");
+        }
+
+        // actually begin the transaction
+        $result = $this->pdo->beginTransaction();
+        if ($result) {
+            $this->inTransaction = true;
+        }
+
+        // return success or failure
+        return $result;
+    }
+
+
+    /**
+     * commits a transaction started with beginTransaction
+     * @return bool
+     * @throws \RuntimeException
+     */
+    public function commitTransaction()
+    {
+        // check we are already in a transaction
+        if (!$this->inTransaction) {
+            throw new \RuntimeException("commitTransaction called without a matching beginTransaction()");
+        }
+
+        $this->inTransaction = false;
+        return $this->pdo->commit();
+    }
+
+
+    /**
+     * Rolls back a transaction in case of error
+     * @return bool
+     * @throws \RuntimeException
+     */
+    public function rollBackTransaction()
+    {
+        // check we are already in a transaction
+        if (!$this->inTransaction) {
+            throw new \RuntimeException("commitTransaction called without a matching beginTransaction()");
+        }
+
+        $this->inTransaction = false;
+        return $this->pdo->rollBack();
+    }
 }
