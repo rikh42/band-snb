@@ -13,16 +13,24 @@ namespace snb\core;
  */
 interface DatabaseInterface
 {
+    // Connections
     public function init();
     public function addConnection($name);
     public function setActiveConnection($name);
     public function isOpenConnection();
 
+    // Queries
     public function all($query, $params = null);
     public function row($query, $params = null);
     public function one($query, $params = null);
     public function query($query, $params = null);
 
+    // Feedback
     public function getLastInsertID();
     public function getLastInsertIDString();
+
+    // Transactions
+    public function beginTransaction();
+    public function commitTransaction();
+    public function rollBackTransaction();
 }
