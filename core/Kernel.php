@@ -510,6 +510,13 @@ class Kernel extends ContainerAware implements KernelInterface
             // to change or modify the selected route
             $routeEvent = new RouteEvent($route, $routes);
             $dispatcher->dispatch('kernel.route', $routeEvent);
+
+            // if the event resulted in a response, return it
+            if ($routeEvent->hasResponse()) {
+                return $routeEvent->getResponse();
+            }
+
+            // If the event resulted in a new route, use that in preference
             if ($routeEvent->hasRoute()) {
                 $route = $routeEvent->getRoute();
             }

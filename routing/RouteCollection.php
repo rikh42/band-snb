@@ -35,10 +35,11 @@ class RouteCollection extends ContainerAware implements UrlGeneratorInterface
         return $this->routes;
     }
 
-    //==============================
-    // find
-    // Finds a named route, if it exists
-    //==============================
+    /**
+     * Finds a named route, if it exists
+     * @param $name
+     * @return \snb\routing\Route | null
+     */
     public function find($name)
     {
         // If the route exists, try and generate a url with it

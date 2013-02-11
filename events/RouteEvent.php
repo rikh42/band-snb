@@ -7,15 +7,16 @@
  */
 
 namespace snb\events;
-use Symfony\Component\EventDispatcher\Event;
+use snb\events\HasResponseEvent;
 use snb\Routing\Route;
 use snb\routing\RouteCollection;
 
 /**
  * An event that gets sent around once a matching route has been found
  * This gives you a chance to change the route, should you want to
+ * You can also return a response (via the HasResponseEvent class) if that makes more sense
  */
-class RouteEvent extends Event
+class RouteEvent extends HasResponseEvent
 {
     public $route;
     public $allRoutes;

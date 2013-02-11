@@ -28,7 +28,7 @@ class ResponseEvent extends Event
 
     /**
      * Returns the response
-     * @return snb\http\Response
+     * @return \snb\http\Response
      */
     public function getResponse()
     {
