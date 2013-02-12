@@ -305,6 +305,11 @@ class AbstractType
      */
     public function getId()
     {
+        // If we have specified an id in the config, use that
+        if ($this->has('id')) {
+            return $this->get('id');
+        }
+
         // If we don't have a parent, then my id is my name
         if ($this->parent == null) {
             return $this->getName();
