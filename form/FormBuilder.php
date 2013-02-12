@@ -245,6 +245,9 @@ class FormBuilder extends ContainerAware implements FormBuilderInterface
                     foreach ($value as $validator=>$options) {
                         $class = $this->getValidatorClass($validator);
                         $v = new $class($options);
+                        if ($v instanceof ContainerAwareInterface) {
+                            $v->setContainer($this->container);
+                        }
                         $form->addValidator($v);
                     }
                     break;
