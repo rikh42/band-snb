@@ -50,7 +50,8 @@ class FormBuilder extends ContainerAware implements FormBuilderInterface
         // Add the core filters
         $this->addFilters(array(
             'nop' => 'snb\form\filters\NoOpFilter',
-            'date' => 'snb\form\filters\DateFilter'
+            'date' => 'snb\form\filters\DateFilter',
+            'trim' => 'snb\form\filters\TrimFilter',
         ));
     }
 
