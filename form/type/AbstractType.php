@@ -474,6 +474,30 @@ class AbstractType
         return $valid;
     }
 
+
+    /**
+     * Similar to isValid(), only it does not add any errors to the field.
+     * It is intended as a way of determining if the current state of the field
+     * is valid or not, and nothing else.
+     * @return bool
+     */
+    public function isInValidState()
+    {
+        // iterate over the validators on the field
+        foreach ($this->validators as $validator)
+        {
+            // if any are not valid, make a note of it
+            // we hope that the validators will set an appropriate error
+            // on us, so that it can be rendered in the view.
+            if (!$validator->isValid($this->get('value'))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
     /**
      * Adds an error message to the field
      * This is normally called by one of the validators
