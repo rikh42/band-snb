@@ -120,6 +120,35 @@ class RequestParams
         return $this->clean($this->all[$name]);
     }
 
+
+    /**
+     * Returns a bool of true or false from the value
+     * @param $name
+     * @param bool $default
+     * @return bool
+     */
+    public function getBool($name, $default=false)
+    {
+        // Start by looking at the value as a string
+        $value = mb_strtolower($this->getText($name, ''));
+
+        // the word 'true' maps to true
+        if ($value == 'true') {
+            return true;
+        }
+
+        // similar for false
+        if ($value == 'false') {
+            return false;
+        }
+
+        // wasn't either true or false, so try it as an int
+        $value = (bool) $this->getInt($name, $default);
+        return $value;
+    }
+
+
+
     //==============================
     // getInt
     // Gets an int for the named value
