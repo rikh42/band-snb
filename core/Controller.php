@@ -10,28 +10,25 @@ namespace snb\core;
 
 use snb\core\ContainerAware;
 use snb\http\Response;
-
-use snb\core\DatabaseInterface;
 use snb\http\Request;
-use snb\logger\LoggerInterface;
-use snb\form\FormBuilder;
-use snb\security\Auth;
 
-//==============================
-// Controller
-// Base class for controllers.
-//==============================
+/**
+ * A base class for Controllers that gives you a few handy helpers
+ */
 class Controller extends ContainerAware
 {
-    //==============================
-    // init
-    // Called once the object has been created and features added.
-    // Allows sub-classes to hook into this process and add in any features they need access to
-    //==============================
+
+    /**
+     * Called once the object has been created and features added.
+     * Allows sub-classes to hook into this process and add in any features they need access to
+     * @return bool
+     */
     public function init()
     {
         return true;
     }
+
+
 
     /**
      * @param  string $name
@@ -40,7 +37,7 @@ class Controller extends ContainerAware
      */
     public function render($name, array $data = array())
     {
-        return $this->container->get('view')->render($name, $data);
+        return $this->getView()->render($name, $data);
     }
 
     /**
@@ -133,6 +130,7 @@ class Controller extends ContainerAware
         if (preg_match("/^/[^/]/ui", $url) == 1)
         {
             // Add in the protocol and host
+            /* @var $request \snb\http\Request */
             $request = $this->container->get('request');
             if ($request) {
                 $url = $request->getHttpHost() . $url;
@@ -186,7 +184,7 @@ class Controller extends ContainerAware
     }
 
     /**
-     * @return LoggerInterface
+     * @return \snb\logger\LoggerInterface
      */
     public function getLogger()
     {
