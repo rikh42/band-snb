@@ -18,6 +18,7 @@ interface DatabaseInterface
     public function addConnection($name);
     public function setActiveConnection($name);
     public function isOpenConnection();
+    public function closeAllConnections();
 
     // Queries
     public function all($query, $params = null);

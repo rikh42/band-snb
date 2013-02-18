@@ -61,6 +61,11 @@ class ConnectionInfo
         return $this->pdo;
     }
 
+    public function resetPDO()
+    {
+        $this->pdo = null;
+    }
+
     public function getConnectionString()
     {
         return 'mysql:host='.$this->host.';port='.$this->port.';dbname='.$this->database;

@@ -15,10 +15,11 @@ use snb\logger\LoggerInterface;
 use \PDO;
 use \PDOException;
 
-//=====================================
-// Database
-// The core Database management layer
-//=====================================
+
+
+/**
+ * The core Database management layer
+ */
 class Database extends ContainerAware implements DatabaseInterface
 {
     /**
@@ -47,10 +48,12 @@ class Database extends ContainerAware implements DatabaseInterface
     const FETCH_ROW = 2;
     const FETCH_ONE = 3;
 
-    //=====================================
-    // __construct
-    // attempts to initialise the database connection
-    //=====================================
+
+
+
+    /**
+     * attempts to initialise the database connection
+     */
     public function __construct()
     {
         // set some defaults
@@ -75,11 +78,14 @@ class Database extends ContainerAware implements DatabaseInterface
         $this->setActiveConnection('read');
     }
 
-    //=====================================
-    // addConnection
-    // Adds information about a connection to the database object
-    // but does not do anything with it
-    //=====================================
+
+
+
+    /**
+     * Adds information about a connection to the database object
+     * but does not do anything with it
+     * @param $name
+     */
     public function addConnection($name)
     {
         // get the container
@@ -104,10 +110,13 @@ class Database extends ContainerAware implements DatabaseInterface
         $this->logger->debug("Added connection info to Database handler", array('host'=>$host, 'user'=>$user, 'database'=>$database));
     }
 
-    //=====================================
-    // setActiveConnection
-    // makes the named connection the active one, connecting to the database if required.
-    //=====================================
+
+
+    /**
+     * makes the named connection the active one, connecting to the database if required.
+     * @param $name
+     * @return bool
+     */
     public function setActiveConnection($name)
     {
         // If there isn't a connection of that name defined, fail
@@ -123,11 +132,14 @@ class Database extends ContainerAware implements DatabaseInterface
         return true;
     }
 
-    //=====================================
-    // enableActiveConnection
-    // Call this before accessing the pdo object.
-    // This basically performs a lazy connection to the database
-    //=====================================
+
+
+    /**
+     * Call this before accessing the pdo object.
+     * This basically performs a lazy connection to the database
+     * @throws \RuntimeException
+     * @throws \PDOException
+     */
     protected function enableActiveConnection()
     {
         if ($this->pdo != null) {
@@ -140,6 +152,7 @@ class Database extends ContainerAware implements DatabaseInterface
         }
 
         // We have a connection. Has it already been set up?
+        /* @var $info ConnectionInfo */
         $info = $this->connections[$this->activeConnection];
         if ($info->getPDO() == null) {
             // now try and reconnect
@@ -168,10 +181,10 @@ class Database extends ContainerAware implements DatabaseInterface
         $this->pdo = $info->getPDO();
     }
 
-    //=====================================
-    // resetResults
-    // Clears the last results etc at the start of a new query
-    //=====================================
+
+    /**
+     * Clears the last results etc at the start of a new query
+     */
     protected function resetResults()
     {
         // reset a few things
@@ -180,22 +193,50 @@ class Database extends ContainerAware implements DatabaseInterface
         $this->lastRowsAffected = 0;
     }
 
-    //=====================================
-    // isOpenConnection
-    // returns true if there is a valid connection to a database
-    // As connections are only created when needed (ie when a the first query is performed)
-    // this will always return false until after an attempt to make a query.
-    //=====================================
+
+
+    /**
+     * returns true if there is a valid connection to a database
+     * As connections are only created when needed (ie when a the first query is performed)
+     * this will always return false until after an attempt to make a query.
+     * @return bool
+     */
     public function isOpenConnection()
     {
         return ($this->pdo != null);
     }
 
-    //=====================================
-    // autoBind
-    // binds the named params in the query to values passed in
-    // eg. $params['int:iUser'] = 5; would bind the value 5 to the named argument :iUser as an integer
-    //=====================================
+
+    /**
+     * Close all the connections. This is not needed in a normal web application.
+     * However, if you are working with an application that runs for long periods
+     * (for example a command line queue processor), then you may need to close the connections
+     * to prevent them timing out and falling into a broken state.
+     */
+    public function closeAllConnections()
+    {
+        // get rid of the connection we are using
+        $this->pdo = null;
+
+        // loop over all the connections we have and ensure they are all closed.
+        foreach ($this->connections as $connection)
+        {
+            // Get rid of the cached connections as well
+            /* @var $connection ConnectionInfo */
+            $connection->resetPDO();
+        }
+    }
+
+
+
+
+    /**
+     * binds the named params in the query to values passed in
+     * eg. $params['int:iUser'] = 5; would bind the value 5 to the named argument :iUser as an integer
+     * @param \PDOStatement $statement
+     * @param $query
+     * @param $params
+     */
     protected function autoBind(\PDOStatement $statement, $query, $params)
     {
         // If the params passed in is an array, bind its contents, else ignore it
@@ -261,11 +302,14 @@ class Database extends ContainerAware implements DatabaseInterface
         }
     }
 
-    //=====================================
-    // selectQuery
-    // Help function to handle all the select queries
-    // $fetchMode. One of FETCH_ALL, FETCH_ROW or FETCH_ONE
-    //=====================================
+    /**
+     * Help function to handle all the select queries
+     * @param $query
+     * @param $params
+     * @param $fetchMethod - One of FETCH_ALL, FETCH_ROW or FETCH_ONE
+     * @return bool|null
+     * @throws \RuntimeException
+     */
     protected function selectQuery($query, $params, $fetchMethod)
     {
         try {
@@ -327,37 +371,55 @@ class Database extends ContainerAware implements DatabaseInterface
         }
     }
 
-    //=====================================
-    // all
-    // Get all the results back from a query.
-    //=====================================
+
+
+    /**
+     * Get all the results back from a query.
+     * @param $query - SQL Query
+     * @param array|null $params
+     * @return null|array
+     */
     public function all($query, $params=null)
     {
         return $this->selectQuery($query, $params, self::FETCH_ALL);
     }
 
-    //=====================================
-    // row
-    // Get a single row of data back from the query
-    //=====================================
+
+
+
+    /**
+     * Get a single row of data back from the query
+     * @param $query - The SQL Query
+     * @param array|null $params
+     * @return stdClass|null
+     */
     public function row($query, $params=null)
     {
         return $this->selectQuery($query, $params, self::FETCH_ROW);
     }
 
-    //=====================================
-    // one
-    // Get a single value back from the query
-    //=====================================
+
+
+    /**
+     * Get a single value back from the query
+     * @param $query - An SQL Query
+     * @param array|null $params
+     * @return mixed|null
+     */
     public function one($query, $params=null)
     {
         return $this->selectQuery($query, $params, self::FETCH_ONE);
     }
 
-    //=====================================
-    // query
-    // general insert or update query
-    //=====================================
+
+
+    /**
+     * general insert or update query
+     * @param $query
+     * @param array|null $params
+     * @return int
+     * @throws \RuntimeException
+     */
     public function query($query, $params=null)
     {
         try {
@@ -396,21 +458,24 @@ class Database extends ContainerAware implements DatabaseInterface
         }
     }
 
-    //=====================================
-    // getLastInsertID
-    // gets the index of the row inserted in the last query.
-    // It is reset to 0 with every query made to the database, so you will need to get
-    // this value right away if you need it.
-    //=====================================
+
+
+    /**
+     * gets the index of the row inserted in the last query.
+     * It is reset to 0 with every query made to the database, so you will need to get
+     * this value right away if you need it.
+     * @return int
+     */
     public function getLastInsertID()
     {
         return (int) $this->lastInsertID;
     }
 
-    //=====================================
-    // getLastInsertIDString
-    // gets the index of the row inserted in the last query as a string.
-    //=====================================
+
+    /**
+     * gets the index of the row inserted in the last query as a string.
+     * @return int
+     */
     public function getLastInsertIDString()
     {
         return $this->lastInsertID;
