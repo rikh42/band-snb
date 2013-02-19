@@ -142,7 +142,7 @@ class FormBuilder extends ContainerAware implements FormBuilderInterface
             $filename = $this->container->get('kernel')->findResource($resource, 'forms');
 
             // Read in the content (file or string)
-            $content = Yaml::parse($filename);
+            $content = Yaml::parse(file_get_contents($filename));
 
             // bad data turns into an empty result
             if ($content==null) {

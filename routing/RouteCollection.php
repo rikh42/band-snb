@@ -137,7 +137,7 @@ class RouteCollection extends ContainerAware implements UrlGeneratorInterface
         $filename = $kernel->findResource($resourceName, 'config');
 
         // Load in the routes
-        $content = Yaml::parse($filename);
+        $content = Yaml::parse(file_get_contents($filename));
         if (($content == null) || (!is_array($content))) {
             return $routes;
         }

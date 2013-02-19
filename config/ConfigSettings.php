@@ -129,7 +129,7 @@ class ConfigSettings implements ConfigInterface
         $configPath = $this->kernel->findResource($resource, 'config');
 
         // Read in the content (file or string)
-        $content = Yaml::parse($configPath);
+        $content = Yaml::parse(file_get_contents($configPath));
 
         // bad data turns into an empty result
         if ($content == null) {
