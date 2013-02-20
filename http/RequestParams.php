@@ -122,6 +122,24 @@ class RequestParams
 
 
     /**
+     * If the content is binary, this will return the raw content, unmodified.
+     * Use with care and attention.
+     * @param $name
+     * @param null $default
+     * @return null
+     */
+    public function getBinary($name, $default=null)
+    {
+        if (!array_key_exists($name, $this->all)) {
+            return $default;
+        }
+
+        // return the raw, unmodified content - here be dragons...
+        return $this->all[$name];
+    }
+
+
+    /**
      * Returns a bool of true or false from the value
      * @param $name
      * @param bool $default
