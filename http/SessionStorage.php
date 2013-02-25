@@ -67,6 +67,18 @@ class SessionStorage extends ContainerAware implements SessionStorageInterface
         $_SESSION[self::FLASH_KEY] = array();
     }
 
+
+    /**
+     * Close the session before the end of the script.
+     */
+    public function end()
+    {
+        $this->started = false;
+        session_write_close();
+    }
+
+
+
     //==============================
     // get
     // Gets a value stored in the session

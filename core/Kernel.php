@@ -121,6 +121,18 @@ class Kernel extends ContainerAware implements KernelInterface
         $this->booted = true;
     }
 
+
+    /**
+     * Can be called on shutdown to cleanly close various services
+     */
+    public function shutdown()
+    {
+
+    }
+
+
+
+
     /**
      * Calls the AppKernel to find the list of packages being used
      */

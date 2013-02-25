@@ -11,6 +11,7 @@ namespace snb\http;
 interface SessionStorageInterface
 {
     public function start();
+    public function end();
     public function get($key, $default=null);
     public function set($key, $value);
     public function remove($key);
