@@ -107,28 +107,32 @@ class SessionStorageDb extends SessionStorage
 
 
 
-    //==============================
-    // write
-    // called by PHP to write all the session data to the database
-    //==============================
+
+    /**
+     * called by PHP to write all the session data to the database
+     * @param $sessionID - the PHP session ID (basically a random string of characters)
+     * @param $data - The actual data to be stored
+     * @return bool - returns true
+     */
     public function write($sessionID, $data)
     {
-        // Build the query to update the session in the DB
-        $sql = "UPDATE sessions SET sData=:data, iLastTouched=:time WHERE sSessionId=:sessionid LIMIT 1";
+        // prepare the data for the query
         $param = array(
-            'text:sessionid' => $sessionID,
-            'text:data' => base64_encode($data),
-            'int:time' => time()
+            'id' => $sessionID,
+            'data' => base64_encode($data),
+            'time' => time()
         );
 
-        // try and do it
-        $updateCount = $this->database->query($sql, $param);
-        if ($updateCount==0) {
-            // if we failed, it is because the session was not in the db, so add it
-            $this->startNewSession($sessionID, $data);
-        }
+        // duplicate some of the data for PDO
+        $param['udata'] = $param['data'];
+        $param['utime'] = $param['time'];
 
-        // yay
+        // Try and insert or update the data
+        $sql = "INSERT INTO sessions (sSessionId, sData, iLastTouched) VALUES (:id, :data, :time) "
+             . "ON DUPLICATE KEY UPDATE sData=:udata, iLastTouched=:utime ";
+
+        // do it.
+        $this->database->query($sql, $param);
         return true;
     }
 
