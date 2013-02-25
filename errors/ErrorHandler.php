@@ -56,12 +56,11 @@ class ErrorHandler
     private $level;
     private $exceptionHandler;
 
+
     /**
-     * Register the error handler.
-     *
-     * @param integer $level The level at which the conversion to Exception is done (null to use the error_reporting() value and 0 to disable)
-     *
-     * @return The registered error handler
+     * @param ExceptionHandler $exceptionHandler
+     * @param null $level - The level at which the conversion to Exception is done (null to use the error_reporting() value and 0 to disable)
+     * @return ErrorHandler
      */
     public static function register(ExceptionHandler $exceptionHandler, $level = null)
     {
@@ -75,6 +74,11 @@ class ErrorHandler
         return $handler;
     }
 
+
+    /**
+     * Sets the level at which errors become exceptions
+     * @param $level
+     */
     public function setLevel($level)
     {
         $this->level = null === $level ? error_reporting() : $level;
