@@ -71,7 +71,7 @@ class SessionStorage extends ContainerAware implements SessionStorageInterface
     /**
      * Close the session before the end of the script.
      */
-    public function end()
+    public function closeAndWrite()
     {
         $this->started = false;
         session_write_close();
