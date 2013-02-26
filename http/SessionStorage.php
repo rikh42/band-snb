@@ -73,8 +73,13 @@ class SessionStorage extends ContainerAware implements SessionStorageInterface
      */
     public function closeAndWrite()
     {
+        // Stop if we were started
+        if ($this->started) {
+            session_write_close();
+        }
+
+        // make sure we are stopped
         $this->started = false;
-        session_write_close();
     }
 
 

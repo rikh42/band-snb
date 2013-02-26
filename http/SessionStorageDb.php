@@ -116,6 +116,11 @@ class SessionStorageDb extends SessionStorage
      */
     public function write($sessionID, $data)
     {
+        // If we've been stopped, don't do anything.
+        if (!$this->started) {
+            return true;
+        }
+
         // prepare the data for the query
         $param = array(
             'id' => $sessionID,
