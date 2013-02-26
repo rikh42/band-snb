@@ -41,6 +41,12 @@ use snb\errors\FlattenException;
  */
 class FlattenExceptionFormatter
 {
+
+    /**
+     * Turn a flattened Exception into HTML
+     * @param FlattenException $exception
+     * @return string
+     */
     public static function formatException(FlattenException $exception)
     {
         $count = count($exception->getAllPrevious());
@@ -68,6 +74,45 @@ class FlattenExceptionFormatter
         return $content;
 
     }
+
+
+    /**
+     * Turn a flat exception into plain text
+     * @param FlattenException $exception
+     * @return string
+     */
+    public static function formatExceptionPlain(FlattenException $exception)
+    {
+        $count = count($exception->getAllPrevious());
+        $content = '';
+        foreach ($exception->toArray() as $position => $e)
+        {
+            $ind = $count - $position + 1;
+            $total = $count + 1;
+            $class = $e['class'];
+            $message = nl2br($e['message']);
+            $content .= "$ind/$total: $class: $message\n";
+            foreach ($e['trace'] as $i => $trace)
+            {
+                $content .= '- ';
+                if ($trace['function'])
+                {
+                    $content .= sprintf('at %s%s%s()', $trace['class'], $trace['type'], $trace['function']);
+                }
+                if (isset($trace['file']) && isset($trace['line']))
+                {
+                    $content .= sprintf('in %s line %s', $trace['file'], $trace['line']);
+                }
+                $content .= "\n";
+            }
+
+            $content .= "\n";
+        }
+
+        return $content;
+
+    }
+
 
     public static function abbrClass($class)
     {
