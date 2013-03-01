@@ -118,6 +118,7 @@ class Controller extends ContainerAware
      * is also OK (/etc.htm) as we add the current requests http host to it first.
      * @param $url
      * @param \snb\http\Response $response
+     * @return \snb\http\Response
      */
     public function redirectUrlResponse($url, Response $response = null)
     {
@@ -127,7 +128,7 @@ class Controller extends ContainerAware
         }
 
         // If the URL appears to be a relative URL (/some/path/test.png)
-        if (preg_match("/^/[^/]/ui", $url) == 1)
+        if (preg_match('%^/[^/]%iu', $url) == 1)
         {
             // Add in the protocol and host
             /* @var $request \snb\http\Request */
@@ -139,6 +140,7 @@ class Controller extends ContainerAware
 
         // finally, set the redirection
         $response->setRedirectToURL($url);
+        return $response;
     }
 
 
