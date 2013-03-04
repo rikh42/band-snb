@@ -185,6 +185,16 @@ class Route
         return true;
     }
 
+
+    /**
+     * Returns the URL that matched the route, or empty string
+     * @return string
+     */
+    public function getMatchedUri()
+    {
+        return $this->matchedUri;
+    }
+
     /**
      * Gets the name of the class for the controller
      * @return string
