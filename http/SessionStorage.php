@@ -18,6 +18,7 @@ use snb\core\ContainerAware;
 class SessionStorage extends ContainerAware implements SessionStorageInterface
 {
     protected $started;
+    protected $writeEnabled;
     protected $flashMessages;
     const FLASH_KEY = '_flashes';
 
@@ -30,6 +31,7 @@ class SessionStorage extends ContainerAware implements SessionStorageInterface
     {
         // default values
         $this->started = false;
+        $this->writeEnabled = true;
     }
 
     //==============================
@@ -69,10 +71,24 @@ class SessionStorage extends ContainerAware implements SessionStorageInterface
 
 
     /**
+     * Enable or disable writing to the session, where supported by the driver (SessionStorageDB only at present)
+     * @param $writeEnable
+     */
+    public function setWriteEnable($writeEnable)
+    {
+        $this->writeEnabled = $writeEnable;
+    }
+
+
+    /**
      * Close the session before the end of the script.
      */
     public function closeAndWrite()
     {
+        // Allow writing, briefly
+        $old = $this->writeEnabled;
+        $this->setWriteEnable(true);
+
         // Stop if we were started
         if ($this->started) {
             session_write_close();
@@ -80,6 +96,7 @@ class SessionStorage extends ContainerAware implements SessionStorageInterface
 
         // make sure we are stopped
         $this->started = false;
+        $this->setWriteEnable($old);
     }
 
 

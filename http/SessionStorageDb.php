@@ -18,9 +18,10 @@ class SessionStorageDb extends SessionStorage
 {
     protected $database;
 
-    //==============================
-    // __construct
-    //==============================
+
+    /**
+     * @param \snb\core\DatabaseInterface $database
+     */
     public function __construct(DatabaseInterface $database)
     {
         parent::__construct();
@@ -29,10 +30,11 @@ class SessionStorageDb extends SessionStorage
         $this->database = $database;
     }
 
-    //==============================
-    // start
-    // Starts a session
-    //==============================
+
+    /**
+     * Starts the session. This sets up all the Session handler functions to
+     * use our overrides, allowing us to write to a database instead
+     */
     public function start()
     {
         // If we have already started the session, don't do it again
@@ -57,10 +59,12 @@ class SessionStorageDb extends SessionStorage
 
 
 
-    //==============================
-    // open
-    // Called by PHP when the session is first opened
-    //==============================
+    /**
+     * Called by PHP when the session is first opened
+     * @param $path
+     * @param $name
+     * @return bool
+     */
     public function open($path, $name)
     {
         return true;
@@ -69,10 +73,10 @@ class SessionStorageDb extends SessionStorage
 
 
 
-    //==============================
-    // close
-    // Called by PHP when the session finally closed
-    //==============================
+    /**
+     * Called by PHP when the session finally closed
+     * @return bool
+     */
     public function close()
     {
         return true;
@@ -81,10 +85,11 @@ class SessionStorageDb extends SessionStorage
 
 
 
-    //==============================
-    // read
-    // called by PHP to read the session data. All the data is read in one go
-    //==============================
+    /**
+     * called by PHP to read the session data. All the data is read in one go
+     * @param $sessionID
+     * @return string
+     */
     public function read($sessionID)
     {
         // try and find the session data in the database
@@ -118,6 +123,11 @@ class SessionStorageDb extends SessionStorage
     {
         // If we've been stopped, don't do anything.
         if (!$this->started) {
+            return true;
+        }
+
+        // If writing has been disabled, don't write to the database
+        if (!$this->writeEnabled) {
             return true;
         }
 
