@@ -306,7 +306,7 @@ class Route
                 $value = $this->cleanArgument($args[$var], $type);
             } else {
                 // no argument provided
-                if ($this->defaults[$var] != null) {
+                if (array_key_exists($var, $this->defaults)) {
                     // Use the default value
                     $value = $this->cleanArgument($this->defaults[$var], $type);
                 } else {
