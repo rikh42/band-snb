@@ -18,9 +18,10 @@ class SessionStorageDb extends SessionStorage
 {
     protected $database;
 
-    //==============================
-    // __construct
-    //==============================
+
+    /**
+     * @param \snb\core\DatabaseInterface $database
+     */
     public function __construct(DatabaseInterface $database)
     {
         parent::__construct();
@@ -29,10 +30,11 @@ class SessionStorageDb extends SessionStorage
         $this->database = $database;
     }
 
-    //==============================
-    // start
-    // Starts a session
-    //==============================
+
+    /**
+     * Starts the session. This sets up all the Session handler functions to
+     * use our overrides, allowing us to write to a database instead
+     */
     public function start()
     {
         // If we have already started the session, don't do it again
@@ -57,10 +59,12 @@ class SessionStorageDb extends SessionStorage
 
 
 
-    //==============================
-    // open
-    // Called by PHP when the session is first opened
-    //==============================
+    /**
+     * Called by PHP when the session is first opened
+     * @param $path
+     * @param $name
+     * @return bool
+     */
     public function open($path, $name)
     {
         return true;
@@ -69,10 +73,10 @@ class SessionStorageDb extends SessionStorage
 
 
 
-    //==============================
-    // close
-    // Called by PHP when the session finally closed
-    //==============================
+    /**
+     * Called by PHP when the session finally closed
+     * @return bool
+     */
     public function close()
     {
         return true;
@@ -81,10 +85,11 @@ class SessionStorageDb extends SessionStorage
 
 
 
-    //==============================
-    // read
-    // called by PHP to read the session data. All the data is read in one go
-    //==============================
+    /**
+     * called by PHP to read the session data. All the data is read in one go
+     * @param $sessionID
+     * @return string
+     */
     public function read($sessionID)
     {
         // try and find the session data in the database
@@ -107,28 +112,42 @@ class SessionStorageDb extends SessionStorage
 
 
 
-    //==============================
-    // write
-    // called by PHP to write all the session data to the database
-    //==============================
+
+    /**
+     * called by PHP to write all the session data to the database
+     * @param $sessionID - the PHP session ID (basically a random string of characters)
+     * @param $data - The actual data to be stored
+     * @return bool - returns true
+     */
     public function write($sessionID, $data)
     {
-        // Build the query to update the session in the DB
-        $sql = "UPDATE sessions SET sData=:data, iLastTouched=:time WHERE sSessionId=:sessionid LIMIT 1";
-        $param = array(
-            'text:sessionid' => $sessionID,
-            'text:data' => base64_encode($data),
-            'int:time' => time()
-        );
-
-        // try and do it
-        $updateCount = $this->database->query($sql, $param);
-        if ($updateCount==0) {
-            // if we failed, it is because the session was not in the db, so add it
-            $this->startNewSession($sessionID, $data);
+        // If we've been stopped, don't do anything.
+        if (!$this->started) {
+            return true;
         }
 
-        // yay
+        // If writing has been disabled, don't write to the database
+        if (!$this->writeEnabled) {
+            return true;
+        }
+
+        // prepare the data for the query
+        $param = array(
+            'id' => $sessionID,
+            'data' => base64_encode($data),
+            'time' => time()
+        );
+
+        // duplicate some of the data for PDO
+        $param['udata'] = $param['data'];
+        $param['utime'] = $param['time'];
+
+        // Try and insert or update the data
+        $sql = "INSERT INTO sessions (sSessionId, sData, iLastTouched) VALUES (:id, :data, :time) "
+             . "ON DUPLICATE KEY UPDATE sData=:udata, iLastTouched=:utime ";
+
+        // do it.
+        $this->database->query($sql, $param);
         return true;
     }
 

@@ -11,9 +11,9 @@ use snb\logger\LoggerInterface;
 
 class Logger implements LoggerInterface
 {
-    const DEBUG = 100;		// useful to know if you were debugging the app
+    const DEBUG_LOGGER = 100;		// useful to know if you were debugging the app (changed to DEBUG_LOGGER to prevent clash with other constants)
     const INFO = 200;		// Stuff it would be good to know about (eg a login)
-    const WARNING = 300;	// something stange is going on
+    const WARNING = 300;	// something strange is going on
     const ERROR = 400;		// there was some kind of error
 
     protected $handler;
@@ -79,7 +79,7 @@ class Logger implements LoggerInterface
      */
     public function debug($message, $extraData = null)
     {
-        $this->addRecord(self::DEBUG, $message, $extraData);
+        $this->addRecord(self::DEBUG_LOGGER, $message, $extraData);
     }
 
     /**
@@ -129,7 +129,7 @@ class Logger implements LoggerInterface
             'current' => memory_get_usage(true)
         );
 
-        $this->addRecord(self::DEBUG, $message, $data);
+        $this->addRecord(self::DEBUG_LOGGER, $message, $data);
     }
 
     /**
@@ -149,7 +149,7 @@ class Logger implements LoggerInterface
             'time' => $queryTime
         );
 
-        $this->addRecord(self::DEBUG, $message, $data);
+        $this->addRecord(self::DEBUG_LOGGER, $message, $data);
     }
 
     /**
@@ -164,6 +164,6 @@ class Logger implements LoggerInterface
             'time' => microtime(true)
         );
 
-        $this->addRecord(self::DEBUG, $message, $data);
+        $this->addRecord(self::DEBUG_LOGGER, $message, $data);
     }
 }

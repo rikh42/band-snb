@@ -13,6 +13,7 @@ use snb\routing\Route;
 interface KernelInterface
 {
     public function boot();
+    public function shutdown();
     public function getPackagePath($name);
     public function findPath($name);
     public function findResource($name, $type);
