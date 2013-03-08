@@ -21,6 +21,10 @@ class SessionStorageNull implements SessionStorageInterface
     {
     }
 
+    public function setWriteEnable($writeEnable)
+    {
+    }
+
     public function closeAndWrite()
     {
     }
