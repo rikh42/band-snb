@@ -186,6 +186,7 @@ class Kernel extends ContainerAware implements KernelInterface
         $this->addService('db.migrate', 'snb\core\Migrate')->setArguments(array('::service::database', '::service::logger'))->addCall('ensureMigrationTable');
         $this->addService('cache', 'snb\cache\NullCache');
         $this->addService('email', 'snb\email\NullEmail')->setMultiInstance();
+        $this->addService('output.cache', 'snb\http\OutputCacheNull');
     }
 
 
@@ -533,14 +534,12 @@ class Kernel extends ContainerAware implements KernelInterface
                 $route = $routeEvent->getRoute();
             }
 
-            // Try and return a cached version of the page, before we do any real work
-            $cache = null;
-            $cacheKey = $route->getCacheKey();
-            if ($cacheKey)
-            {
-                // Caching for the page is enabled, so try and look it up in the cache
-                $cache = $this->container->get('cache');
-                $response = $cache->get($cacheKey);
+            /** @var $outputCache \snb\http\OutputCacheInterface */
+            $outputCache = $this->container->get('output.cache');
+            $outputCacheSettings = $route->getOption('cache');
+            if ($outputCacheSettings != null) {
+                // See if we can find the response in the output cache.
+                $response = $outputCache->getResponse($request, $outputCacheSettings);
                 if ($response) {
                     return $response;
                 }
@@ -553,8 +552,8 @@ class Kernel extends ContainerAware implements KernelInterface
             $response = $this->postProcessResponse($response);
 
             // If we are caching the response, then do it now...
-            if ($cacheKey && $cache) {
-                $cache->set($cacheKey, $response, $route->getCacheDuration());
+            if ($outputCacheSettings != null) {
+                $outputCache->cacheResponse($response, $outputCacheSettings);
             }
 
             // finally return the response, ready to be sent to the client
