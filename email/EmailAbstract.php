@@ -189,6 +189,72 @@ class EmailAbstract extends ContainerAware implements EmailInterface
 
 
     /**
+     * Clears all the To Address list
+     * @return EmailAbstract
+     */
+    public function resetTo()
+    {
+        $this->to = array();
+        return $this;
+    }
+
+
+    /**
+     * Reset the list of CC emails
+     * @return EmailAbstract
+     */
+    public function resetCc()
+    {
+        $this->cc = array();
+        return $this;
+    }
+
+
+    /**
+     * Reset the list of Bcc email addresses
+     * @return EmailAbstract
+     */
+    public function resetBcc()
+    {
+        $this->bcc = array();
+        return $this;
+    }
+
+
+    /**
+     * Reset the list of To, Cc and Bcc email addresses
+     * @return EmailAbstract
+     */
+    public function resetAllTo()
+    {
+        return $this->resetTo()->resetCc()->resetBcc();
+    }
+
+
+    /**
+     * Reset the From address
+     * @return EmailAbstract
+     */
+    public function resetFrom()
+    {
+        $this->from = '';
+        return $this;
+    }
+
+
+    /**
+     * Reset the ReplyTo Address
+     * @return EmailAbstract
+     */
+    public function resetReplyTo()
+    {
+        $this->replyTo = '';
+        return $this;
+    }
+
+
+
+    /**
      * @param $email - An email address
      * @param $name - the name of the person
      * @return array - containing email, name and prepared entries
