@@ -381,7 +381,7 @@ class Route
         }
 
         // before url encoding it
-        return urlencode($value);
+        return $value;
     }
 
 
