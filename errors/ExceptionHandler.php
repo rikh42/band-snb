@@ -92,13 +92,18 @@ class ExceptionHandler
             $code = 500;
             $title = 'We\'re sorry, but it looks like something went wrong.';
             $exception = FlattenException::create($exception);
-            $content = FlattenExceptionFormatter::formatException($exception);
+            if (PHP_SAPI === 'cli') {
+                $content = FlattenExceptionFormatter::formatExceptionPlain($exception);
+            } else {
+                $content = $this->decorate(FlattenExceptionFormatter::formatException($exception), $title);
+            }
         } catch (\Exception $e) {
             $title = 'We\'re sorry, but it looks like something went wrong.';
+            $content = $this->decorate('', $title);
         }
 
         // build a response out of anything we got
-        return new Response($this->decorate($content, $title), $code);
+        return new Response($content, $code);
     }
 
     protected function decorate($content, $title)
