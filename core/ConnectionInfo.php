@@ -20,15 +20,17 @@ class ConnectionInfo
     protected $user = '';
     protected $password = '';
     protected $database = '';
+    protected $charset = '';
     protected $pdo = null;
 
-    public function __construct($host, $port, $user, $password, $database)
+    public function __construct($host, $port, $user, $password, $database, $charset='')
     {
         $this->host = $host;
         $this->port = $port;
         $this->user = $user;
         $this->password = $password;
         $this->database = $database;
+        $this->charset = $charset;
     }
 
     public function setServer($host, $port)
@@ -51,6 +53,12 @@ class ConnectionInfo
         $this->pdo = null;
     }
 
+    public function setCharset($charset)
+    {
+        $this->charset = $charset;
+        $this->pdo = null;
+    }
+
     public function setPDO(PDO $pdo)
     {
         $this->pdo = $pdo;
@@ -68,7 +76,25 @@ class ConnectionInfo
 
     public function getConnectionString()
     {
-        return 'mysql:host='.$this->host.';port='.$this->port.';dbname='.$this->database;
+        $items = array();
+        if (!empty($this->host)) {
+            $items[] = "host={$this->host}";
+        }
+
+        if (!empty($this->port)) {
+            $items[] = "port={$this->port}";
+        }
+
+        if (!empty($this->database)) {
+            $items[] = "dbname={$this->database}";
+        }
+
+        if (!empty($this->charset)) {
+            $items[] = "charset={$this->charset}";
+        }
+
+        $cs = implode(';', $items);
+        return 'mysql:'.$cs;
     }
 
     public function getUsername()
