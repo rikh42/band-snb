@@ -49,6 +49,13 @@ class FlattenException
     private $statusCode;
     private $headers;
 
+
+    /**
+     * @param \Exception $exception
+     * @param int $statusCode
+     * @param array $headers
+     * @return FlattenException
+     */
     public static function create(\Exception $exception, $statusCode = 500, array $headers = array())
     {
         $e = new static();
@@ -65,6 +72,10 @@ class FlattenException
         return $e;
     }
 
+
+    /**
+     * @return array
+     */
     public function toArray()
     {
         $exceptions = array();
