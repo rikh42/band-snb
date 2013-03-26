@@ -107,6 +107,7 @@ class SessionStorage extends ContainerAware implements SessionStorageInterface
     //==============================
     public function get($key, $default=null)
     {
+        $this->start();
         if (array_key_exists($key, $_SESSION)) {
             return $_SESSION[$key];
         }
@@ -120,6 +121,7 @@ class SessionStorage extends ContainerAware implements SessionStorageInterface
     //==============================
     public function set($key, $value)
     {
+        $this->start();
         $_SESSION[$key] = $value;
     }
 
@@ -129,6 +131,7 @@ class SessionStorage extends ContainerAware implements SessionStorageInterface
     //==============================
     public function remove($key)
     {
+        $this->start();
         if (array_key_exists($key, $_SESSION)) {
             unset($_SESSION[$key]);
         }
@@ -141,6 +144,7 @@ class SessionStorage extends ContainerAware implements SessionStorageInterface
      */
     public function setFlash($name, $msg)
     {
+        $this->start();
         $_SESSION[self::FLASH_KEY][$name] = $msg;
     }
 
@@ -151,6 +155,7 @@ class SessionStorage extends ContainerAware implements SessionStorageInterface
      */
     public function removeFlash($name)
     {
+        $this->start();
         unset($_SESSION[self::FLASH_KEY][$name]);
     }
 

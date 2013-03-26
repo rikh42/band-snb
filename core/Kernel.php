@@ -169,13 +169,13 @@ class Kernel extends ContainerAware implements KernelInterface
         // Add some services that are part of the system
         $this->addService('kernel', $this);
         $this->addService('config', 'snb\config\ConfigSettings')->setArguments(array('::service::kernel'))->addCall('load', array($this->getConfigName()));
-        $this->addService('routes', 'snb\routing\RouteCollection');
+        $this->addService('routes', 'snb\routing\RouteCollection')->addCall('load');;
         $this->addService('event-dispatcher', new EventDispatcher);
         $this->addService('logger', $this->logger);
         $this->addService('view', 'snb\view\TwigView');
 		$this->addServiceAlias('template.engine', 'view');
         $this->addService('database', 'snb\core\Database')->addCall('init', array());
-        $this->addService('session', 'snb\http\SessionStorage')->addCall('start');
+        $this->addService('session', 'snb\http\SessionStorage');
         $this->addService('auth', 'snb\security\Auth')->setArguments(array('::service::auth.token', '::service::auth.context', '::service::event-dispatcher'));
         $this->addService('auth.token', 'snb\security\SecurityToken');
         $this->addService('auth.context', 'snb\security\SecurityContext');
@@ -501,12 +501,9 @@ class Kernel extends ContainerAware implements KernelInterface
                 return $this->postProcessResponse($requestEvent->getResponse());
             }
 
-            // load routes and find the route
+            // load routes and find the route that matches the request
 			/** @var $routes \snb\routing\RouteCollection */
             $routes = $this->container->get('routes');
-            $routes->load();
-
-            // Try and find a route that matches the request
             $route = $routes->findMatchingRoute($request);
 
             // If we have no valid route, then try something else.

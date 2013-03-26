@@ -106,7 +106,6 @@ class SessionStorageDb extends SessionStorage
 
         // nope, no data, so start a new session and return an empty data string
         $this->startNewSession($sessionID);
-
         return '';
     }
 
@@ -131,23 +130,32 @@ class SessionStorageDb extends SessionStorage
             return true;
         }
 
-        // prepare the data for the query
-        $param = array(
-            'id' => $sessionID,
-            'data' => base64_encode($data),
-            'time' => time()
-        );
+        try
+        {
+            // prepare the data for the query
+            $param = array(
+                'id' => $sessionID,
+                'data' => base64_encode($data),
+                'time' => time()
+            );
 
-        // duplicate some of the data for PDO
-        $param['udata'] = $param['data'];
-        $param['utime'] = $param['time'];
+            // duplicate some of the data for PDO
+            $param['udata'] = $param['data'];
+            $param['utime'] = $param['time'];
 
-        // Try and insert or update the data
-        $sql = "INSERT INTO sessions (sSessionId, sData, iLastTouched) VALUES (:id, :data, :time) "
-             . "ON DUPLICATE KEY UPDATE sData=:udata, iLastTouched=:utime ";
+            // Try and insert or update the data
+            $sql = "INSERT INTO sessions (sSessionId, sData, iLastTouched) VALUES (:id, :data, :time) "
+                 . "ON DUPLICATE KEY UPDATE sData=:udata, iLastTouched=:utime ";
 
-        // do it.
-        $this->database->query($sql, $param);
+            // do it.
+            $this->database->query($sql, $param);
+        } catch (\Exception $e)
+        {
+            // Something went wrong writing the session to the database.
+            // There is nothing we can really do about this..
+        }
+
+
         return true;
     }
 
