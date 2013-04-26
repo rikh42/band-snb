@@ -182,7 +182,7 @@ class PasswordHash
         $rnd = array();
         for ($i = 0; $i < $count; $i++) {
             // Don't use mod, as that will distort the randomness
-            $rnd[] = (int) (ord($bytes[$i]) / 255 * $range);
+            $rnd[] = (int) ((ord($bytes[$i]) / 255) * ($range-1));
         }
 
         return $rnd;
