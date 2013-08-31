@@ -367,7 +367,7 @@ class Database extends ContainerAware implements DatabaseInterface
         } catch (PDOException $e) {
             $this->logger->error('Query Failed. PDO threw an exception: '.$e->getMessage(), array('query'=>$query, 'args'=>$params));
 
-            throw new \RuntimeException("PDO Query Failed", 0, $e);
+            throw new \RuntimeException("PDO Query Failed: $query", 0, $e);
         }
     }
 
