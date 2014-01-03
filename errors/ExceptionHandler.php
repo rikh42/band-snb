@@ -93,7 +93,13 @@ class ExceptionHandler
             $title = 'We\'re sorry, but it looks like something went wrong.';
             $exception = FlattenException::create($exception);
             if (PHP_SAPI === 'cli') {
+                // we are on the command line, so get the error in a clean format
                 $content = FlattenExceptionFormatter::formatExceptionPlain($exception);
+
+                // dump it out and exit with an error code
+                echo $content;
+                exit(1);
+                
             } else {
                 $content = $this->decorate(FlattenExceptionFormatter::formatException($exception), $title);
             }
