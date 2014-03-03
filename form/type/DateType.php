@@ -37,7 +37,8 @@ class DateType extends FieldType
         // Need to convert the date time object to text
         $date = $view->get('value');
         if ($date instanceof \DateTime) {
-            $view->set('value', $date->format('j M Y'));
+            $format = $view->get('format', 'j M Y');
+            $view->set('value', $date->format($format));
         }
 
         return $view;
